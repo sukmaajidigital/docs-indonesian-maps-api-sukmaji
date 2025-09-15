@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Indonesian Maps API - Documentation</title>
+    <meta
+      name="description"
+      content="Complete documentation for Indonesian Maps API - RESTful API for Indonesian geographical and administrative data"
+    />
+    <meta
+      name="keywords"
+      content="Indonesia, maps, API, geographical data, administrative regions, provinces, cities, districts"
+    />
+    <meta name="author" content="Sukma Aji Digital" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>"
+    />
+
+    <!-- External CSS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+      <div class="container">
+        <a class="navbar-brand" href="#home">
+          <i class="fas fa-map-marked-alt me-2"></i>
+          Indonesian Maps API
+        </a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#home">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#overview">Overview</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#documentation">Documentation</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#demo">Demo</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#visualization">Visualization</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#map">Interactive Map</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="https://github.com/sukmaajidigital" target="_blank">
+                <i class="fab fa-github"></i> GitHub
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+      <div class="container">
+        <div class="row align-items-center min-vh-100">
+          <div class="col-lg-6">
+            <div class="hero-content">
+              <h1 class="display-4 fw-bold mb-4">Indonesian Maps API</h1>
+              <p class="lead mb-4">
+                Comprehensive RESTful API for Indonesian geographical and administrative data.
+                Access detailed information about provinces, cities, districts, villages, and
+                islands with complete demographic and geographic data.
+              </p>
+              <div class="hero-stats mb-4">
+                <div class="row text-center">
+                  <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                      <h3 class="text-primary">38</h3>
+                      <p>Provinces</p>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                      <h3 class="text-primary">501+</h3>
+                      <p>Cities/Regencies</p>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                      <h3 class="text-primary">17K+</h3>
+                      <p>Islands</p>
+                    </div>
+                  </div>
+                  <div class="col-md-3 col-6">
+                    <div class="stat-item">
+                      <h3 class="text-primary">16</h3>
+                      <p>Endpoints</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="hero-buttons">
+                <a href="#documentation" class="btn btn-primary btn-lg me-3">
+                  <i class="fas fa-book me-2"></i>Get Started
+                </a>
+                <a href="#demo" class="btn btn-outline-primary btn-lg">
+                  <i class="fas fa-play me-2"></i>Try Demo
+                </a>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="hero-image">
+              <div class="api-preview-card">
+                <div class="card-header">
+                  <div class="d-flex align-items-center">
+                    <div class="dot bg-danger"></div>
+                    <div class="dot bg-warning"></div>
+                    <div class="dot bg-success"></div>
+                    <span class="ms-3 text-muted">api.sukmaaji.my.id</span>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "kode_provinsi": 32,
+    "nama_provinsi": "Jawa Barat",
+    "ibukota": "Bandung",
+    "lat": "-6.902224715926122",
+    "lng": "107.6187597542088",
+    "luas": "37053.331",
+    "penduduk": "51316378.0"
+  },
+  "message": "Success"
+}</code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section id="overview" class="py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center mb-5">
+            <h2 class="display-5 fw-bold mb-4">API Overview</h2>
+            <p class="lead">
+              The Indonesian Maps API provides comprehensive access to geographical and
+              administrative data for Indonesia, including provinces, cities, districts, villages,
+              and islands.
+            </p>
+          </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+          <div class="col-lg-4">
+            <div class="feature-card h-100">
+              <div class="feature-icon">
+                <i class="fas fa-map-marked-alt"></i>
+              </div>
+              <h4>Complete Geographic Data</h4>
+              <p>
+                Access detailed information about all administrative levels in Indonesia, from
+                provinces down to villages.
+              </p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="feature-card h-100">
+              <div class="feature-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h4>Demographic Information</h4>
+              <p>
+                Get population data, area measurements, and other demographic statistics for each
+                region.
+              </p>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="feature-card h-100">
+              <div class="feature-icon">
+                <i class="fas fa-search"></i>
+              </div>
+              <h4>Search & Filter</h4>
+              <p>
+                Advanced search functionality with pagination and hierarchical filtering
+                capabilities.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- API Information -->
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="api-info-card">
+              <div class="row">
+                <div class="col-md-6">
+                  <h5><i class="fas fa-server me-2"></i>Base URL</h5>
+                  <code class="fs-6">https://api.sukmaaji.my.id/indonesian-maps</code>
+                </div>
+                <div class="col-md-6">
+                  <h5><i class="fas fa-code me-2"></i>Response Format</h5>
+                  <span class="badge bg-success">JSON</span>
+                  <span class="badge bg-info">UTF-8</span>
+                </div>
+              </div>
+              <hr />
+              <div class="row">
+                <div class="col-md-6">
+                  <h5><i class="fas fa-shield-alt me-2"></i>Authentication</h5>
+                  <span class="badge bg-secondary">None Required</span>
+                </div>
+                <div class="col-md-6">
+                  <h5><i class="fas fa-tachometer-alt me-2"></i>Rate Limiting</h5>
+                  <span class="badge bg-warning text-dark">No Limits</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Documentation Section -->
+    <section id="documentation" class="py-5 bg-light">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center mb-5">
+            <h2 class="display-5 fw-bold mb-4">API Documentation</h2>
+            <p class="lead">Complete reference for all available endpoints</p>
+          </div>
+        </div>
+
+        <!-- Endpoints Documentation -->
+        <div class="endpoints-documentation">
+          <!-- Provinces Endpoints -->
+          <div class="endpoint-section mb-5">
+            <h3 class="section-title"><i class="fas fa-map me-2"></i>Provinces (Provinsi)</h3>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/provinsi</code>
+                <span class="endpoint-description">Get all provinces</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Query Parameters</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>page</code></td>
+                            <td>integer</td>
+                            <td>Page number (default: 1)</td>
+                          </tr>
+                          <tr>
+                            <td><code>limit</code></td>
+                            <td>integer</td>
+                            <td>Items per page (default: 50, max: 1000)</td>
+                          </tr>
+                          <tr>
+                            <td><code>search</code></td>
+                            <td>string</td>
+                            <td>Search by province name</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Example Response</h6>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "kode_provinsi": 32,
+      "nama_provinsi": "Jawa Barat"
+    }
+  ],
+  "message": "Successfully retrieved 38 provinces",
+  "total": 38,
+  "page": 1,
+  "limit": 50,
+  "totalPages": 1
+}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/provinsi/{code}</code>
+                <span class="endpoint-description">Get province detail</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Path Parameters</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>code</code></td>
+                            <td>integer</td>
+                            <td>Province code (e.g., 32 for West Java)</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Example Response</h6>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "kode_provinsi": 32,
+    "nama_provinsi": "Jawa Barat"
+  },
+  "message": "Successfully retrieved province Jawa Barat"
+}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/provinsi/{code}/geo</code>
+                <span class="endpoint-description">Get province geographical data</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-12">
+                    <h6>Example Response</h6>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": {
+    "kode_provinsi": "32",
+    "nama_provinsi": "Jawa Barat",
+    "ibukota": "Bandung",
+    "lat": "-6.902224715926122",
+    "lng": "107.6187597542088",
+    "elv": "739.0",
+    "tz": "7",
+    "luas": "37053.331",
+    "penduduk": "51316378.0",
+    "status": "1"
+  },
+  "message": "Successfully retrieved geo data for province Jawa Barat"
+}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cities/Regencies Endpoints -->
+          <div class="endpoint-section mb-5">
+            <h3 class="section-title">
+              <i class="fas fa-city me-2"></i>Regencies/Cities (Kabupaten/Kota)
+            </h3>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/kabupaten-kota</code>
+                <span class="endpoint-description">Get all regencies/cities</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Query Parameters</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>kode_provinsi</code></td>
+                            <td>integer</td>
+                            <td>Filter by province code</td>
+                          </tr>
+                          <tr>
+                            <td><code>search</code></td>
+                            <td>string</td>
+                            <td>Search by name</td>
+                          </tr>
+                          <tr>
+                            <td><code>page</code></td>
+                            <td>integer</td>
+                            <td>Page number</td>
+                          </tr>
+                          <tr>
+                            <td><code>limit</code></td>
+                            <td>integer</td>
+                            <td>Items per page</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Example Response</h6>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "kode_kabupaten_kota": "32.04",
+      "nama_kabupaten_kota": "Kabupaten Bandung"
+    }
+  ],
+  "message": "Successfully retrieved regencies/cities",
+  "total": 27,
+  "page": 1,
+  "limit": 10,
+  "totalPages": 3
+}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Districts Endpoints -->
+          <div class="endpoint-section mb-5">
+            <h3 class="section-title"><i class="fas fa-building me-2"></i>Districts (Kecamatan)</h3>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/kecamatan</code>
+                <span class="endpoint-description">Get all districts</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Query Parameters</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>kode_kabupaten_kota</code></td>
+                            <td>string</td>
+                            <td>Filter by regency/city code</td>
+                          </tr>
+                          <tr>
+                            <td><code>search</code></td>
+                            <td>string</td>
+                            <td>Search by district name</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Example Usage</h6>
+                    <pre><code class="language-bash">GET /indonesian-maps/kecamatan?kode_kabupaten_kota=32.04</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Villages Endpoints -->
+          <div class="endpoint-section mb-5">
+            <h3 class="section-title"><i class="fas fa-home me-2"></i>Villages (Desa/Kelurahan)</h3>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/desa-kelurahan</code>
+                <span class="endpoint-description">Get all villages</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Query Parameters</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>kode_kecamatan</code></td>
+                            <td>string</td>
+                            <td>Filter by district code</td>
+                          </tr>
+                          <tr>
+                            <td><code>search</code></td>
+                            <td>string</td>
+                            <td>Search by village name</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Example Usage</h6>
+                    <pre><code class="language-bash">GET /indonesian-maps/desa-kelurahan?kode_kecamatan=32.04.01</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Islands Endpoints -->
+          <div class="endpoint-section mb-5">
+            <h3 class="section-title"><i class="fas fa-water me-2"></i>Islands (Pulau)</h3>
+
+            <div class="endpoint-item">
+              <div class="endpoint-header">
+                <span class="method-badge get">GET</span>
+                <code>/indonesian-maps/pulau</code>
+                <span class="endpoint-description">Get all islands</span>
+              </div>
+              <div class="endpoint-body">
+                <div class="row">
+                  <div class="col-md-6">
+                    <h6>Query Parameters</h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead>
+                          <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td><code>kode_provinsi</code></td>
+                            <td>integer</td>
+                            <td>Filter by province code</td>
+                          </tr>
+                          <tr>
+                            <td><code>search</code></td>
+                            <td>string</td>
+                            <td>Search by island name</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>Example Response</h6>
+                    <pre><code class="language-json">{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "nama_pulau": "Pulau Batukapal",
+      "lat": "5.8833",
+      "lng": "95.3167"
+    }
+  ],
+  "total": 17222,
+  "page": 1,
+  "limit": 50
+}</code></pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center mb-5">
+            <h2 class="display-5 fw-bold mb-4">Live API Demo</h2>
+            <p class="lead">Test the API endpoints directly from your browser</p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="demo-card">
+              <div class="demo-controls">
+                <div class="row g-3">
+                  <div class="col-md-4">
+                    <label for="endpoint-select" class="form-label">Select Endpoint</label>
+                    <select class="form-select" id="endpoint-select">
+                      <option value="/indonesian-maps">API Info</option>
+                      <option value="/indonesian-maps/provinsi">All Provinces</option>
+                      <option value="/indonesian-maps/provinsi/32">
+                        Province Detail (West Java)
+                      </option>
+                      <option value="/indonesian-maps/provinsi/32/geo">Province Geo Data</option>
+                      <option value="/indonesian-maps/kabupaten-kota?kode_provinsi=32&limit=10">
+                        Cities in West Java
+                      </option>
+                      <option value="/indonesian-maps/pulau?limit=10">Islands (Limited)</option>
+                    </select>
+                  </div>
+                  <div class="col-md-6">
+                    <label for="endpoint-url" class="form-label">Full URL</label>
+                    <input type="text" class="form-control" id="endpoint-url" readonly />
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label">&nbsp;</label>
+                    <button class="btn btn-primary w-100" id="try-endpoint">
+                      <i class="fas fa-play me-2"></i>Try It
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="demo-response mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="mb-0">Response</h5>
+                  <div class="response-status" id="response-status"></div>
+                </div>
+                <pre
+                  id="response-output"
+                  class="response-content"
+                ><code class="language-json">Click "Try It" to see the response</code></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Visualization Section -->
+    <section id="visualization" class="py-5 bg-light">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center mb-5">
+            <h2 class="display-5 fw-bold mb-4">Data Visualization</h2>
+            <p class="lead">
+              Interactive charts and tables showcasing Indonesian geographical data
+            </p>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-5">
+          <div class="col-lg-6">
+            <div class="chart-card">
+              <h4 class="chart-title">
+                <i class="fas fa-chart-pie me-2"></i>Population by Province (Top 10)
+              </h4>
+              <canvas id="populationChart"></canvas>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="chart-card">
+              <h4 class="chart-title">
+                <i class="fas fa-chart-bar me-2"></i>Area by Province (Top 10)
+              </h4>
+              <canvas id="areaChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="table-card">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0"><i class="fas fa-table me-2"></i>Provinces Data Table</h4>
+                <div class="table-controls">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="table-search"
+                    placeholder="Search provinces..."
+                  />
+                </div>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-striped table-hover" id="provinces-table">
+                  <thead class="table-dark">
+                    <tr>
+                      <th>Code</th>
+                      <th>Province</th>
+                      <th>Capital</th>
+                      <th>Population</th>
+                      <th>Area (km²)</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="provinces-table-body">
+                    <tr>
+                      <td colspan="6" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">Loading...</span>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <nav aria-label="Table pagination">
+                <ul class="pagination justify-content-center" id="table-pagination">
+                  <!-- Pagination will be generated dynamically -->
+                </ul>
+              </nav>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section id="map" class="py-5">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center mb-5">
+            <h2 class="display-5 fw-bold mb-4">Interactive Map</h2>
+            <p class="lead">
+              Explore Indonesian provinces with detailed information and boundaries
+            </p>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-lg-3">
+            <div class="map-controls">
+              <h5>Map Controls</h5>
+
+              <div class="mb-3">
+                <label for="province-selector" class="form-label">Select Province</label>
+                <select class="form-select" id="province-selector">
+                  <option value="">Select a province...</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="map-layer" class="form-label">Map Layer</label>
+                <select class="form-select" id="map-layer">
+                  <option value="osm">OpenStreetMap</option>
+                  <option value="satellite">Satellite</option>
+                  <option value="terrain">Terrain</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <button class="btn btn-outline-primary w-100" id="reset-map">
+                  <i class="fas fa-undo me-2"></i>Reset View
+                </button>
+              </div>
+
+              <!-- Selected Province Info -->
+              <div class="province-info" id="province-info" style="display: none">
+                <h6>Province Information</h6>
+                <div class="info-content" id="province-info-content">
+                  <!-- Dynamic content -->
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-9">
+            <div class="map-container">
+              <div id="indonesia-map" class="interactive-map"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-4">
+            <h5>Indonesian Maps API</h5>
+            <p>Comprehensive RESTful API for Indonesian geographical and administrative data.</p>
+            <div class="social-links">
+              <a href="https://github.com/sukmaajidigital" target="_blank" class="text-light me-3">
+                <i class="fab fa-github fa-lg"></i>
+              </a>
+              <a
+                href="https://instagram.com/sukmaaji.digital"
+                target="_blank"
+                class="text-light me-3"
+              >
+                <i class="fab fa-instagram fa-lg"></i>
+              </a>
+              <a href="https://sukmaaji.my.id" target="_blank" class="text-light">
+                <i class="fas fa-globe fa-lg"></i>
+              </a>
+            </div>
+          </div>
+          <div class="col-lg-2">
+            <h6>Quick Links</h6>
+            <ul class="list-unstyled">
+              <li><a href="#home" class="text-light">Home</a></li>
+              <li><a href="#documentation" class="text-light">Documentation</a></li>
+              <li><a href="#demo" class="text-light">Demo</a></li>
+              <li><a href="#map" class="text-light">Map</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-3">
+            <h6>Endpoints</h6>
+            <ul class="list-unstyled">
+              <li><a href="#" class="text-light">Provinces</a></li>
+              <li><a href="#" class="text-light">Cities/Regencies</a></li>
+              <li><a href="#" class="text-light">Districts</a></li>
+              <li><a href="#" class="text-light">Villages</a></li>
+              <li><a href="#" class="text-light">Islands</a></li>
+            </ul>
+          </div>
+          <div class="col-lg-3">
+            <h6>Contact</h6>
+            <p>
+              <i class="fas fa-envelope me-2"></i>
+              <a href="mailto:contact@sukmaaji.my.id" class="text-light">contact@sukmaaji.my.id</a>
+            </p>
+            <p>
+              <i class="fas fa-link me-2"></i>
+              <a href="https://sukmaaji.my.id" class="text-light">sukmaaji.my.id</a>
+            </p>
+          </div>
+        </div>
+        <hr class="my-4" />
+        <div class="row">
+          <div class="col-lg-12 text-center">
+            <p>&copy; 2025 Sukma Aji Digital. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- External JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+
+    <!-- Custom JS -->
+    <script src="script.js"></script>
+  </body>
+</html>
