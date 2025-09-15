@@ -655,16 +655,14 @@
                   <div class="col-md-4">
                     <label for="endpoint-select" class="form-label">Select Endpoint</label>
                     <select class="form-select" id="endpoint-select">
-                      <option value="/indonesian-maps">API Info</option>
-                      <option value="/indonesian-maps/provinsi">All Provinces</option>
-                      <option value="/indonesian-maps/provinsi/32">
-                        Province Detail (West Java)
-                      </option>
-                      <option value="/indonesian-maps/provinsi/32/geo">Province Geo Data</option>
-                      <option value="/indonesian-maps/kabupaten-kota?kode_provinsi=32&limit=10">
+                      <option value="">API Info</option>
+                      <option value="/provinsi">All Provinces</option>
+                      <option value="/provinsi/32">Province Detail (West Java)</option>
+                      <option value="/provinsi/32/geo">Province Geo Data</option>
+                      <option value="/kabupaten-kota?kode_provinsi=32&limit=10">
                         Cities in West Java
                       </option>
-                      <option value="/indonesian-maps/pulau?limit=10">Islands (Limited)</option>
+                      <option value="/pulau?limit=10">Islands (Limited)</option>
                     </select>
                   </div>
                   <div class="col-md-6">
@@ -705,26 +703,6 @@
             <p class="lead">
               Interactive charts and tables showcasing Indonesian geographical data
             </p>
-          </div>
-        </div>
-
-        <!-- Charts Row -->
-        <div class="row g-4 mb-5">
-          <div class="col-lg-6">
-            <div class="chart-card">
-              <h4 class="chart-title">
-                <i class="fas fa-chart-pie me-2"></i>Population by Province (Top 10)
-              </h4>
-              <canvas id="populationChart"></canvas>
-            </div>
-          </div>
-          <div class="col-lg-6">
-            <div class="chart-card">
-              <h4 class="chart-title">
-                <i class="fas fa-chart-bar me-2"></i>Area by Province (Top 10)
-              </h4>
-              <canvas id="areaChart"></canvas>
-            </div>
           </div>
         </div>
 
@@ -802,6 +780,27 @@
               </div>
 
               <div class="mb-3">
+                <label for="city-selector" class="form-label">Select City/Regency</label>
+                <select class="form-select" id="city-selector" disabled>
+                  <option value="">Select a city/regency...</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="district-selector" class="form-label">Select District</label>
+                <select class="form-select" id="district-selector" disabled>
+                  <option value="">Select a district...</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label for="village-selector" class="form-label">Select Village</label>
+                <select class="form-select" id="village-selector" disabled>
+                  <option value="">Select a village...</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
                 <label for="map-layer" class="form-label">Map Layer</label>
                 <select class="form-select" id="map-layer">
                   <option value="osm">OpenStreetMap</option>
@@ -811,15 +810,36 @@
               </div>
 
               <div class="mb-3">
+                <label class="form-label">Boundaries</label>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="checkbox"
+                    id="show-province-boundaries"
+                    checked
+                  />
+                  <label class="form-check-label" for="show-province-boundaries">
+                    Show Province Boundaries
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="show-city-boundaries" />
+                  <label class="form-check-label" for="show-city-boundaries">
+                    Show City/Regency Boundaries
+                  </label>
+                </div>
+              </div>
+
+              <div class="mb-3">
                 <button class="btn btn-outline-primary w-100" id="reset-map">
                   <i class="fas fa-undo me-2"></i>Reset View
                 </button>
               </div>
 
-              <!-- Selected Province Info -->
-              <div class="province-info" id="province-info" style="display: none">
-                <h6>Province Information</h6>
-                <div class="info-content" id="province-info-content">
+              <!-- Selected Location Info -->
+              <div class="location-info" id="location-info" style="display: none">
+                <h6>Location Information</h6>
+                <div class="info-content" id="location-info-content">
                   <!-- Dynamic content -->
                 </div>
               </div>

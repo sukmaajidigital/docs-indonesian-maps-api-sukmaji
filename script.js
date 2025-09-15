@@ -12,7 +12,18 @@ const CONFIG = {
 let map;
 let provincesData = [];
 let currentProvinceLayer = null;
+let currentCityLayer = null;
+let currentDistrictLayer = null;
+let currentVillageLayer = null;
+let provinceBoundariesLayer = null;
+let cityBoundariesLayer = null;
 let chartInstances = {};
+let selectedLocation = {
+    province: null,
+    city: null,
+    district: null,
+    village: null
+};
 
 // Utility functions
 const utils = {
@@ -72,7 +83,10 @@ const utils = {
 const apiService = {
     async fetchData(endpoint) {
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`);
+            const fullUrl = `${CONFIG.API_BASE_URL}${endpoint}`;
+            console.log('Fetching:', fullUrl); // Debug log
+
+            const response = await fetch(fullUrl);
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -84,9 +98,7 @@ const apiService = {
             console.error('API fetch error:', error);
             throw error;
         }
-    },
-
-    async getProvinces() {
+    }, async getProvinces() {
         return await this.fetchData('/provinsi');
     },
 
@@ -104,6 +116,56 @@ const apiService = {
             params.append('kode_provinsi', provinceCode);
         }
         return await this.fetchData(`/kabupaten-kota?${params}`);
+    },
+
+    async getCityDetail(code) {
+        return await this.fetchData(`/kabupaten-kota/${code}`);
+    },
+
+    async getCityGeo(code) {
+        return await this.fetchData(`/kabupaten-kota/${code}/geo`);
+    },
+
+    async getDistricts(cityCode = null, limit = 50) {
+        const params = new URLSearchParams({ limit: limit.toString() });
+        if (cityCode) {
+            params.append('kode_kabupaten_kota', cityCode);
+        }
+        return await this.fetchData(`/kecamatan?${params}`);
+    },
+
+    async getDistrictDetail(code) {
+        return await this.fetchData(`/kecamatan/${code}`);
+    },
+
+    async getVillages(districtCode = null, limit = 50) {
+        const params = new URLSearchParams({ limit: limit.toString() });
+        if (districtCode) {
+            params.append('kode_kecamatan', districtCode);
+        }
+        return await this.fetchData(`/desa-kelurahan?${params}`);
+    },
+
+    async getVillageDetail(code) {
+        return await this.fetchData(`/desa-kelurahan/${code}`);
+    },
+
+    async getDistrictGeo(code) {
+        return await this.fetchData(`/kecamatan/${code}/geo`);
+    },
+
+    async getVillageGeo(code) {
+        return await this.fetchData(`/desa-kelurahan/${code}/geo`);
+    },
+
+    async getProvinceBoundary(code) {
+        // Note: Boundary API endpoints might need to be confirmed with actual API
+        return await this.fetchData(`/provinsi/${code}/boundary`);
+    },
+
+    async getCityBoundary(code) {
+        // Note: Boundary API endpoints might need to be confirmed with actual API
+        return await this.fetchData(`/kabupaten-kota/${code}/boundary`);
     },
 
     async getIslands(limit = 50) {
@@ -141,17 +203,17 @@ const mapManager = {
         // Set max bounds to Indonesia
         map.setMaxBounds(CONFIG.INDONESIA_BOUNDS);
 
-        // Load provinces data and add to map
-        this.loadProvincesData();
+        // Load only provinces list initially (not geo data)
+        this.loadProvincesListOnly();
     },
 
-    async loadProvincesData() {
+    async loadProvincesListOnly() {
         try {
             const response = await apiService.getProvinces();
             if (response.success && response.data) {
                 provincesData = response.data;
                 this.populateProvinceSelector();
-                await this.addProvinceMarkers();
+                // Don't load all markers initially - only when needed
             }
         } catch (error) {
             console.error('Error loading provinces:', error);
@@ -171,32 +233,131 @@ const mapManager = {
         }
     },
 
-    async addProvinceMarkers() {
-        for (const province of provincesData) {
-            try {
-                const geoResponse = await apiService.getProvinceGeo(province.kode_provinsi);
-                if (geoResponse.success && geoResponse.data) {
-                    const geoData = geoResponse.data;
-                    const lat = parseFloat(geoData.lat);
-                    const lng = parseFloat(geoData.lng);
+    async populateCitySelector(provinceCode) {
+        const selector = document.getElementById('city-selector');
+        if (!selector) return;
 
-                    if (!isNaN(lat) && !isNaN(lng)) {
-                        const marker = L.marker([lat, lng]).addTo(map);
+        if (!provinceCode) {
+            selector.innerHTML = '<option value="">Select a city/regency...</option>';
+            selector.disabled = true;
+            this.clearDistrictSelector();
+            return;
+        }
 
-                        const popupContent = this.createProvincePopup(geoData);
-                        marker.bindPopup(popupContent);
+        try {
+            selector.innerHTML = '<option value="">Loading...</option>';
+            selector.disabled = true;
 
-                        // Store reference for later use
-                        marker.provinceData = geoData;
-                    }
-                }
-            } catch (error) {
-                console.error(`Error loading geo data for ${province.nama_provinsi}:`, error);
+            const response = await apiService.getCities(provinceCode, 100);
+            if (response.success && response.data) {
+                selector.innerHTML = '<option value="">Select a city/regency...</option>';
+                response.data.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.kode_kabupaten_kota;
+                    option.textContent = city.nama_kabupaten_kota;
+                    selector.appendChild(option);
+                });
+                selector.disabled = false;
             }
+        } catch (error) {
+            console.error('Error loading cities:', error);
+            selector.innerHTML = '<option value="">Error loading cities</option>';
         }
     },
 
-    createProvincePopup(data) {
+    async populateDistrictSelector(cityCode) {
+        const selector = document.getElementById('district-selector');
+        if (!selector) return;
+
+        if (!cityCode) {
+            selector.innerHTML = '<option value="">Select a district...</option>';
+            selector.disabled = true;
+            this.clearVillageSelector();
+            return;
+        }
+
+        try {
+            selector.innerHTML = '<option value="">Loading...</option>';
+            selector.disabled = true;
+
+            const response = await apiService.getDistricts(cityCode, 100);
+            if (response.success && response.data) {
+                selector.innerHTML = '<option value="">Select a district...</option>';
+                response.data.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.kode_kecamatan;
+                    option.textContent = district.nama_kecamatan;
+                    selector.appendChild(option);
+                });
+                selector.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error loading districts:', error);
+            selector.innerHTML = '<option value="">Error loading districts</option>';
+        }
+    },
+
+    async populateVillageSelector(districtCode) {
+        const selector = document.getElementById('village-selector');
+        if (!selector) return;
+
+        if (!districtCode) {
+            selector.innerHTML = '<option value="">Select a village...</option>';
+            selector.disabled = true;
+            return;
+        }
+
+        try {
+            selector.innerHTML = '<option value="">Loading...</option>';
+            selector.disabled = true;
+
+            const response = await apiService.getVillages(districtCode, 100);
+            if (response.success && response.data) {
+                selector.innerHTML = '<option value="">Select a village...</option>';
+                response.data.forEach(village => {
+                    const option = document.createElement('option');
+                    option.value = village.kode_desa_kelurahan;
+                    option.textContent = village.nama_desa_kelurahan;
+                    selector.appendChild(option);
+                });
+                selector.disabled = false;
+            }
+        } catch (error) {
+            console.error('Error loading villages:', error);
+            selector.innerHTML = '<option value="">Error loading villages</option>';
+        }
+    },
+
+    clearCitySelector() {
+        const selector = document.getElementById('city-selector');
+        if (selector) {
+            selector.innerHTML = '<option value="">Select a city/regency...</option>';
+            selector.disabled = true;
+        }
+        this.clearDistrictSelector();
+    },
+
+    clearDistrictSelector() {
+        const selector = document.getElementById('district-selector');
+        if (selector) {
+            selector.innerHTML = '<option value="">Select a district...</option>';
+            selector.disabled = true;
+        }
+        this.clearVillageSelector();
+    },
+
+    clearVillageSelector() {
+        const selector = document.getElementById('village-selector');
+        if (selector) {
+            selector.innerHTML = '<option value="">Select a village...</option>';
+            selector.disabled = true;
+        }
+    },
+
+    async addProvinceMarkersOnDemand() {
+        // This function is now replaced by selectProvince which loads data on-demand
+        // Keeping for backward compatibility but not used
+    }, createProvincePopup(data) {
         return `
             <div class="popup-content">
                 <h6 class="popup-title">${data.nama_provinsi}</h6>
@@ -229,10 +390,27 @@ const mapManager = {
     async selectProvince(provinceCode) {
         if (!provinceCode) {
             this.resetMap();
+            this.clearCitySelector();
             return;
         }
 
         try {
+            // Show loading indicator
+            const infoElement = document.getElementById('province-info');
+            const contentElement = document.getElementById('province-info-content');
+            if (contentElement) {
+                contentElement.innerHTML = '<div class="text-center"><div class="spinner-border spinner-border-sm" role="status"></div> Loading...</div>';
+            }
+            if (infoElement) {
+                infoElement.style.display = 'block';
+            }
+
+            // Store selected province
+            selectedLocation.province = provinceCode;
+            selectedLocation.city = null;
+            selectedLocation.district = null;
+            selectedLocation.village = null;
+
             const geoResponse = await apiService.getProvinceGeo(provinceCode);
             if (geoResponse.success && geoResponse.data) {
                 const geoData = geoResponse.data;
@@ -240,16 +418,250 @@ const mapManager = {
                 const lng = parseFloat(geoData.lng);
 
                 if (!isNaN(lat) && !isNaN(lng)) {
+                    // Remove existing province layer if any
+                    if (currentProvinceLayer) {
+                        map.removeLayer(currentProvinceLayer);
+                    }
+
+                    // Add marker for selected province
+                    currentProvinceLayer = L.marker([lat, lng]).addTo(map);
+                    const popupContent = this.createProvincePopup(geoData);
+                    currentProvinceLayer.bindPopup(popupContent).openPopup();
+
+                    // Pan to province
                     map.setView([lat, lng], 8);
                     this.showProvinceInfo(geoData);
+
+                    // Load cities for this province
+                    await this.populateCitySelector(provinceCode);
                 }
             }
         } catch (error) {
             console.error('Error selecting province:', error);
+            const contentElement = document.getElementById('province-info-content');
+            if (contentElement) {
+                contentElement.innerHTML = '<div class="alert alert-danger alert-sm">Error loading province data</div>';
+            }
         }
     },
 
-    showProvinceInfo(data) {
+    async selectCity(cityCode) {
+        if (!cityCode) {
+            // Remove city layers and clear child selectors
+            if (currentCityLayer) {
+                map.removeLayer(currentCityLayer);
+                currentCityLayer = null;
+            }
+            this.clearDistrictSelector();
+            selectedLocation.city = null;
+            selectedLocation.district = null;
+            selectedLocation.village = null;
+            return;
+        }
+
+        try {
+            selectedLocation.city = cityCode;
+            selectedLocation.district = null;
+            selectedLocation.village = null;
+
+            const geoResponse = await apiService.getCityGeo(cityCode);
+            if (geoResponse.success && geoResponse.data) {
+                const geoData = geoResponse.data;
+                const lat = parseFloat(geoData.lat);
+                const lng = parseFloat(geoData.lng);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Remove existing city layer if any
+                    if (currentCityLayer) {
+                        map.removeLayer(currentCityLayer);
+                    }
+
+                    // Add marker for selected city
+                    currentCityLayer = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    }).addTo(map);
+
+                    const popupContent = `
+                        <div class="popup-content">
+                            <h6 class="popup-title">${geoData.nama_kota_kabupaten}</h6>
+                            <div class="popup-info">
+                                <div class="info-row">
+                                    <span class="info-label">Type:</span>
+                                    <span class="info-value">${geoData.tipe}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Population:</span>
+                                    <span class="info-value">${utils.formatPopulation(geoData.penduduk)}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Area:</span>
+                                    <span class="info-value">${utils.formatArea(geoData.luas)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    currentCityLayer.bindPopup(popupContent).openPopup();
+
+                    // Pan to city with higher zoom
+                    map.setView([lat, lng], 10);
+
+                    // Load districts for this city
+                    await this.populateDistrictSelector(cityCode);
+                }
+            }
+        } catch (error) {
+            console.error('Error selecting city:', error);
+        }
+    },
+
+    async selectDistrict(districtCode) {
+        if (!districtCode) {
+            // Remove district layers and clear child selectors
+            if (currentDistrictLayer) {
+                map.removeLayer(currentDistrictLayer);
+                currentDistrictLayer = null;
+            }
+            this.clearVillageSelector();
+            selectedLocation.district = null;
+            selectedLocation.village = null;
+            return;
+        }
+
+        try {
+            selectedLocation.district = districtCode;
+            selectedLocation.village = null;
+
+            const geoResponse = await apiService.getDistrictGeo(districtCode);
+            if (geoResponse.success && geoResponse.data) {
+                const geoData = geoResponse.data;
+                const lat = parseFloat(geoData.lat);
+                const lng = parseFloat(geoData.lng);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Remove existing district layer if any
+                    if (currentDistrictLayer) {
+                        map.removeLayer(currentDistrictLayer);
+                    }
+
+                    // Add marker for selected district
+                    currentDistrictLayer = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    }).addTo(map);
+
+                    const popupContent = `
+                        <div class="popup-content">
+                            <h6 class="popup-title">${geoData.nama_kecamatan}</h6>
+                            <div class="popup-info">
+                                <div class="info-row">
+                                    <span class="info-label">District Code:</span>
+                                    <span class="info-value">${geoData.kode_kecamatan}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Population:</span>
+                                    <span class="info-value">${utils.formatPopulation(geoData.penduduk)}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Area:</span>
+                                    <span class="info-value">${utils.formatArea(geoData.luas)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    currentDistrictLayer.bindPopup(popupContent).openPopup();
+
+                    // Pan to district with higher zoom
+                    map.setView([lat, lng], 12);
+
+                    // Load villages for this district
+                    await this.populateVillageSelector(districtCode);
+                }
+            }
+        } catch (error) {
+            console.error('Error selecting district:', error);
+        }
+    },
+
+    async selectVillage(villageCode) {
+        if (!villageCode) {
+            // Remove village layer
+            if (currentVillageLayer) {
+                map.removeLayer(currentVillageLayer);
+                currentVillageLayer = null;
+            }
+            selectedLocation.village = null;
+            return;
+        }
+
+        try {
+            selectedLocation.village = villageCode;
+
+            const geoResponse = await apiService.getVillageGeo(villageCode);
+            if (geoResponse.success && geoResponse.data) {
+                const geoData = geoResponse.data;
+                const lat = parseFloat(geoData.lat);
+                const lng = parseFloat(geoData.lng);
+
+                if (!isNaN(lat) && !isNaN(lng)) {
+                    // Remove existing village layer if any
+                    if (currentVillageLayer) {
+                        map.removeLayer(currentVillageLayer);
+                    }
+
+                    // Add marker for selected village
+                    currentVillageLayer = L.marker([lat, lng], {
+                        icon: L.icon({
+                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34],
+                            shadowSize: [41, 41]
+                        })
+                    }).addTo(map);
+
+                    const popupContent = `
+                        <div class="popup-content">
+                            <h6 class="popup-title">${geoData.nama_desa_kelurahan}</h6>
+                            <div class="popup-info">
+                                <div class="info-row">
+                                    <span class="info-label">Village Code:</span>
+                                    <span class="info-value">${geoData.kode_desa_kelurahan}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Population:</span>
+                                    <span class="info-value">${utils.formatPopulation(geoData.penduduk)}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Area:</span>
+                                    <span class="info-value">${utils.formatArea(geoData.luas)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    currentVillageLayer.bindPopup(popupContent).openPopup();
+
+                    // Pan to village with highest zoom
+                    map.setView([lat, lng], 14);
+                }
+            }
+        } catch (error) {
+            console.error('Error selecting village:', error);
+        }
+    }, showProvinceInfo(data) {
         const infoElement = document.getElementById('province-info');
         const contentElement = document.getElementById('province-info-content');
 
@@ -290,9 +702,143 @@ const mapManager = {
 
     resetMap() {
         map.setView(CONFIG.DEFAULT_COORDINATE, CONFIG.DEFAULT_ZOOM);
+
+        // Remove all current layers
+        if (currentProvinceLayer) {
+            map.removeLayer(currentProvinceLayer);
+            currentProvinceLayer = null;
+        }
+        if (currentCityLayer) {
+            map.removeLayer(currentCityLayer);
+            currentCityLayer = null;
+        }
+        if (currentDistrictLayer) {
+            map.removeLayer(currentDistrictLayer);
+            currentDistrictLayer = null;
+        }
+        if (currentVillageLayer) {
+            map.removeLayer(currentVillageLayer);
+            currentVillageLayer = null;
+        }
+
+        // Remove boundary layers
+        if (provinceBoundaryLayer) {
+            map.removeLayer(provinceBoundaryLayer);
+            provinceBoundaryLayer = null;
+        }
+        if (cityBoundaryLayer) {
+            map.removeLayer(cityBoundaryLayer);
+            cityBoundaryLayer = null;
+        }
+
+        // Reset selected location
+        selectedLocation = {
+            province: null,
+            city: null,
+            district: null,
+            village: null
+        };
+
+        // Reset all selectors
+        const provinceSelector = document.getElementById('province-select');
+        const citySelector = document.getElementById('city-selector');
+        const districtSelector = document.getElementById('district-selector');
+        const villageSelector = document.getElementById('village-selector');
+
+        if (provinceSelector) provinceSelector.value = '';
+        if (citySelector) {
+            citySelector.innerHTML = '<option value="">Select a city/regency...</option>';
+            citySelector.disabled = true;
+        }
+        if (districtSelector) {
+            districtSelector.innerHTML = '<option value="">Select a district...</option>';
+            districtSelector.disabled = true;
+        }
+        if (villageSelector) {
+            villageSelector.innerHTML = '<option value="">Select a village...</option>';
+            villageSelector.disabled = true;
+        }
+
+        // Hide info panel
         const infoElement = document.getElementById('province-info');
         if (infoElement) {
             infoElement.style.display = 'none';
+        }
+
+        // Reset boundary toggles
+        const provinceBoundaryToggle = document.getElementById('province-boundary-toggle');
+        const cityBoundaryToggle = document.getElementById('city-boundary-toggle');
+        if (provinceBoundaryToggle) provinceBoundaryToggle.checked = false;
+        if (cityBoundaryToggle) cityBoundaryToggle.checked = false;
+    },
+
+    async toggleProvinceBoundary(show) {
+        if (show && selectedLocation.province) {
+            try {
+                const boundaryResponse = await apiService.getProvinceBoundary(selectedLocation.province);
+                if (boundaryResponse.success && boundaryResponse.data && boundaryResponse.data.boundaries) {
+                    // Remove existing boundary
+                    if (provinceBoundaryLayer) {
+                        map.removeLayer(provinceBoundaryLayer);
+                    }
+
+                    // Add new boundary
+                    provinceBoundaryLayer = L.geoJSON(boundaryResponse.data.boundaries, {
+                        style: {
+                            color: '#ff0000',
+                            weight: 2,
+                            opacity: 0.8,
+                            fillOpacity: 0.1
+                        }
+                    }).addTo(map);
+
+                    // Fit map to boundary
+                    map.fitBounds(provinceBoundaryLayer.getBounds());
+                }
+            } catch (error) {
+                console.error('Error loading province boundary:', error);
+            }
+        } else {
+            // Remove boundary
+            if (provinceBoundaryLayer) {
+                map.removeLayer(provinceBoundaryLayer);
+                provinceBoundaryLayer = null;
+            }
+        }
+    },
+
+    async toggleCityBoundary(show) {
+        if (show && selectedLocation.city) {
+            try {
+                const boundaryResponse = await apiService.getCityBoundary(selectedLocation.city);
+                if (boundaryResponse.success && boundaryResponse.data && boundaryResponse.data.boundaries) {
+                    // Remove existing boundary
+                    if (cityBoundaryLayer) {
+                        map.removeLayer(cityBoundaryLayer);
+                    }
+
+                    // Add new boundary
+                    cityBoundaryLayer = L.geoJSON(boundaryResponse.data.boundaries, {
+                        style: {
+                            color: '#0066cc',
+                            weight: 2,
+                            opacity: 0.8,
+                            fillOpacity: 0.15
+                        }
+                    }).addTo(map);
+
+                    // Fit map to boundary
+                    map.fitBounds(cityBoundaryLayer.getBounds());
+                }
+            } catch (error) {
+                console.error('Error loading city boundary:', error);
+            }
+        } else {
+            // Remove boundary
+            if (cityBoundaryLayer) {
+                map.removeLayer(cityBoundaryLayer);
+                cityBoundaryLayer = null;
+            }
         }
     }
 };
@@ -311,9 +857,7 @@ const demoManager = {
 
             // Set initial value
             endpointUrl.value = CONFIG.API_BASE_URL + endpointSelect.value;
-        }
-
-        if (tryButton) {
+        } if (tryButton) {
             tryButton.addEventListener('click', this.tryEndpoint);
         }
     },
@@ -332,9 +876,7 @@ const demoManager = {
         responseStatus.innerHTML = '<span class="badge bg-warning">Loading</span>';
 
         try {
-            const data = await apiService.fetchData(endpoint);
-
-            // Show success response
+            const data = await apiService.fetchData(endpoint);            // Show success response
             responseOutput.innerHTML = `<code class="language-json">${JSON.stringify(data, null, 2)}</code>`;
             responseStatus.innerHTML = '<span class="badge bg-success">200 OK</span>';
 
@@ -355,10 +897,15 @@ const demoManager = {
 
 // Visualization functionality
 const visualizationManager = {
+    isInitialized: false,
+
     init() {
+        if (this.isInitialized) return; // Prevent double initialization
+
         this.loadProvincesTable();
         this.loadCharts();
         this.initTableSearch();
+        this.isInitialized = true;
     },
 
     async loadProvincesTable() {
@@ -367,26 +914,77 @@ const visualizationManager = {
 
             const response = await apiService.getProvinces();
             if (response.success && response.data) {
-                // Get detailed geo data for all provinces
-                const detailedData = await Promise.all(
-                    response.data.map(async (province) => {
-                        try {
-                            const geoResponse = await apiService.getProvinceGeo(province.kode_provinsi);
-                            return geoResponse.success ? { ...province, geo: geoResponse.data } : province;
-                        } catch (error) {
-                            return province;
-                        }
-                    })
-                );
+                // Show basic table first without geo data
+                this.renderBasicProvincesTable(response.data);
 
-                this.renderProvincesTable(detailedData);
+                // Load detailed data progressively in background
+                this.loadDetailedProvinceData(response.data);
             }
         } catch (error) {
             utils.showError('provinces-table-body', 'Failed to load provinces data');
         }
     },
 
-    renderProvincesTable(data) {
+    renderBasicProvincesTable(data) {
+        const tbody = document.getElementById('provinces-table-body');
+        if (!tbody) return;
+
+        tbody.innerHTML = data.map(province => {
+            return `
+                <tr data-province-code="${province.kode_provinsi}">
+                    <td><span class="badge bg-primary">${province.kode_provinsi}</span></td>
+                    <td><strong>${province.nama_provinsi}</strong></td>
+                    <td><span class="text-muted">Loading...</span></td>
+                    <td><span class="text-muted">Loading...</span></td>
+                    <td><span class="text-muted">Loading...</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="mapManager.selectProvince('${province.kode_provinsi}')">
+                            <i class="fas fa-map-marker-alt me-1"></i>View on Map
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    },
+
+    async loadDetailedProvinceData(provinces) {
+        // Load data for a few provinces at a time to avoid overwhelming the API
+        const batchSize = 5;
+        const tbody = document.getElementById('provinces-table-body');
+
+        for (let i = 0; i < provinces.length; i += batchSize) {
+            const batch = provinces.slice(i, i + batchSize);
+
+            await Promise.all(batch.map(async (province) => {
+                try {
+                    const geoResponse = await apiService.getProvinceGeo(province.kode_provinsi);
+                    if (geoResponse.success && geoResponse.data) {
+                        // Update the specific row with detailed data
+                        const row = tbody.querySelector(`tr[data-province-code="${province.kode_provinsi}"]`);
+                        if (row) {
+                            const geo = geoResponse.data;
+                            row.cells[2].innerHTML = geo.ibukota || 'N/A';
+                            row.cells[3].innerHTML = utils.formatPopulation(geo.penduduk);
+                            row.cells[4].innerHTML = utils.formatArea(geo.luas);
+                        }
+                    }
+                } catch (error) {
+                    // Update row with error state
+                    const row = tbody.querySelector(`tr[data-province-code="${province.kode_provinsi}"]`);
+                    if (row) {
+                        row.cells[2].innerHTML = 'N/A';
+                        row.cells[3].innerHTML = 'N/A';
+                        row.cells[4].innerHTML = 'N/A';
+                    }
+                }
+            }));
+
+            // Small delay between batches to be nice to the server
+            if (i + batchSize < provinces.length) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+    }, renderProvincesTable(data) {
         const tbody = document.getElementById('provinces-table-body');
         if (!tbody) return;
 
@@ -571,13 +1169,33 @@ const visualizationManager = {
 
 // Event listeners
 document.addEventListener('DOMContentLoaded', function () {
-    // Initialize all components
+    // Initialize core components immediately
     if (document.getElementById('indonesia-map')) {
         mapManager.init();
     }
 
     demoManager.init();
-    visualizationManager.init();
+
+    // Initialize visualization with lazy loading
+    const visualizationSection = document.getElementById('visualization');
+    if (visualizationSection) {
+        // Use Intersection Observer to load visualization when section comes into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    visualizationManager.init();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '100px'
+        });
+        observer.observe(visualizationSection);
+    } else {
+        // Fallback if section not found
+        visualizationManager.init();
+    }
 
     // Province selector change
     const provinceSelector = document.getElementById('province-selector');
@@ -587,12 +1205,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // City selector change
+    const citySelector = document.getElementById('city-selector');
+    if (citySelector) {
+        citySelector.addEventListener('change', (e) => {
+            mapManager.selectCity(e.target.value);
+        });
+    }
+
+    // District selector change
+    const districtSelector = document.getElementById('district-selector');
+    if (districtSelector) {
+        districtSelector.addEventListener('change', (e) => {
+            mapManager.selectDistrict(e.target.value);
+        });
+    }
+
+    // Village selector change
+    const villageSelector = document.getElementById('village-selector');
+    if (villageSelector) {
+        villageSelector.addEventListener('change', (e) => {
+            mapManager.selectVillage(e.target.value);
+        });
+    }
+
+    // Province boundary toggle
+    const provinceBoundaryToggle = document.getElementById('province-boundary-toggle');
+    if (provinceBoundaryToggle) {
+        provinceBoundaryToggle.addEventListener('change', (e) => {
+            mapManager.toggleProvinceBoundary(e.target.checked);
+        });
+    }
+
+    // City boundary toggle
+    const cityBoundaryToggle = document.getElementById('city-boundary-toggle');
+    if (cityBoundaryToggle) {
+        cityBoundaryToggle.addEventListener('change', (e) => {
+            mapManager.toggleCityBoundary(e.target.checked);
+        });
+    }
+
     // Reset map button
     const resetMapButton = document.getElementById('reset-map');
     if (resetMapButton) {
         resetMapButton.addEventListener('click', () => {
             mapManager.resetMap();
-            provinceSelector.value = '';
         });
     }
 
