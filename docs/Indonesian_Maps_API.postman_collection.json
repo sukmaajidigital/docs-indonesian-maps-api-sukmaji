@@ -1,0 +1,737 @@
+{
+  "info": {
+    "_postman_id": "12345678-1234-1234-1234-123456789012",
+    "name": "Indonesian Maps API",
+    "description": "RESTful API untuk data geografis dan administratif Indonesia\n\n## Base URL\n`https://api.sukmaaji.my.id/indonesian-maps`\n\n## Features\n- Pagination support\n- Search functionality\n- Hierarchical filtering\n- Geographic data with coordinates\n- Demographic data\n- Response caching\n\n## Query Parameters\n- `page`: Nomor halaman (default: 1)\n- `limit`: Items per page (default: 50, max: 1000)\n- `search`: Search by name (case insensitive)\n- `kode_provinsi`: Filter by province code\n- `kode_kabupaten_kota`: Filter by regency/city code\n- `kode_kecamatan`: Filter by district code",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "API Information",
+      "item": [
+        {
+          "name": "Get API Info",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps",
+              "host": ["{{base_url}}"],
+              "path": ["api"]
+            },
+            "description": "Mendapatkan informasi umum tentang API, termasuk daftar endpoints dan fitur yang tersedia."
+          }
+        }
+      ],
+      "description": "Endpoint untuk mendapatkan informasi umum tentang API"
+    },
+    {
+      "name": "Provinces (Provinsi)",
+      "item": [
+        {
+          "name": "Get All Provinces",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/provinsi?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "provinsi"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Nomor halaman"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Jumlah item per halaman"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar semua provinsi di Indonesia dengan pagination."
+          }
+        },
+        {
+          "name": "Search Provinces",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/provinsi?search=jawa&page=1&limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "provinsi"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "jawa",
+                  "description": "Pencarian berdasarkan nama provinsi"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Mencari provinsi berdasarkan nama (case insensitive)."
+          }
+        },
+        {
+          "name": "Get Province Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/provinsi/32",
+              "host": ["{{base_url}}"],
+              "path": ["api", "provinsi", "32"]
+            },
+            "description": "Mendapatkan detail provinsi berdasarkan kode provinsi. Contoh: 32 untuk Jawa Barat."
+          }
+        },
+        {
+          "name": "Get Province Geo Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/provinsi/32/geo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "provinsi", "32", "geo"]
+            },
+            "description": "Mendapatkan data geografis provinsi termasuk koordinat, ibukota, luas, dan informasi demografi."
+          }
+        },
+        {
+          "name": "Get Complete Province Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/provinsi/complete?limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "provinsi", "complete"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Mendapatkan data provinsi lengkap dengan join ke tabel geo, luas, dan penduduk."
+          }
+        }
+      ],
+      "description": "Endpoints untuk data provinsi"
+    },
+    {
+      "name": "Regencies/Cities (Kabupaten/Kota)",
+      "item": [
+        {
+          "name": "Get All Regencies/Cities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kabupaten-kota?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kabupaten-kota"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar semua kabupaten/kota."
+          }
+        },
+        {
+          "name": "Get Regencies by Province",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kabupaten-kota?kode_provinsi=32&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kabupaten-kota"],
+              "query": [
+                {
+                  "key": "kode_provinsi",
+                  "value": "32",
+                  "description": "Filter berdasarkan kode provinsi"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar kabupaten/kota dalam provinsi tertentu."
+          }
+        },
+        {
+          "name": "Search Regencies/Cities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kabupaten-kota?kode_provinsi=32&search=bandung",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kabupaten-kota"],
+              "query": [
+                {
+                  "key": "kode_provinsi",
+                  "value": "32"
+                },
+                {
+                  "key": "search",
+                  "value": "bandung",
+                  "description": "Pencarian berdasarkan nama"
+                }
+              ]
+            },
+            "description": "Mencari kabupaten/kota berdasarkan nama dalam provinsi tertentu."
+          }
+        },
+        {
+          "name": "Get Regency/City Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kabupaten-kota/3204",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kabupaten-kota", "3204"]
+            },
+            "description": "Mendapatkan detail kabupaten/kota berdasarkan kode."
+          }
+        },
+        {
+          "name": "Get Regency/City Geo Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kabupaten-kota/3204/geo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kabupaten-kota", "3204", "geo"]
+            },
+            "description": "Mendapatkan data geografis kabupaten/kota."
+          }
+        },
+        {
+          "name": "Get Complete Regency/City Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kabupaten-kota/complete?kode_provinsi=32&limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kabupaten-kota", "complete"],
+              "query": [
+                {
+                  "key": "kode_provinsi",
+                  "value": "32"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Mendapatkan data kabupaten/kota lengkap dengan join ke tabel geo, luas, dan penduduk."
+          }
+        }
+      ],
+      "description": "Endpoints untuk data kabupaten/kota"
+    },
+    {
+      "name": "Districts (Kecamatan)",
+      "item": [
+        {
+          "name": "Get All Districts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kecamatan?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kecamatan"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar semua kecamatan."
+          }
+        },
+        {
+          "name": "Get Districts by Province",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kecamatan?kode_provinsi=32&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kecamatan"],
+              "query": [
+                {
+                  "key": "kode_provinsi",
+                  "value": "32"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar kecamatan dalam provinsi tertentu."
+          }
+        },
+        {
+          "name": "Get Districts by Regency/City",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kecamatan?kode_kabupaten_kota=3204",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kecamatan"],
+              "query": [
+                {
+                  "key": "kode_kabupaten_kota",
+                  "value": "3204"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar kecamatan dalam kabupaten/kota tertentu."
+          }
+        },
+        {
+          "name": "Search Districts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kecamatan?kode_kabupaten_kota=3204&search=cicendo",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kecamatan"],
+              "query": [
+                {
+                  "key": "kode_kabupaten_kota",
+                  "value": "3204"
+                },
+                {
+                  "key": "search",
+                  "value": "cicendo"
+                }
+              ]
+            },
+            "description": "Mencari kecamatan berdasarkan nama."
+          }
+        },
+        {
+          "name": "Get District Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/kecamatan/320401",
+              "host": ["{{base_url}}"],
+              "path": ["api", "kecamatan", "320401"]
+            },
+            "description": "Mendapatkan detail kecamatan berdasarkan kode."
+          }
+        }
+      ],
+      "description": "Endpoints untuk data kecamatan"
+    },
+    {
+      "name": "Villages (Desa/Kelurahan)",
+      "item": [
+        {
+          "name": "Get All Villages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/desa-kelurahan?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "desa-kelurahan"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar semua desa/kelurahan."
+          }
+        },
+        {
+          "name": "Get Villages by District",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/desa-kelurahan?kode_kecamatan=320401",
+              "host": ["{{base_url}}"],
+              "path": ["api", "desa-kelurahan"],
+              "query": [
+                {
+                  "key": "kode_kecamatan",
+                  "value": "320401"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar desa/kelurahan dalam kecamatan tertentu."
+          }
+        },
+        {
+          "name": "Get Villages by Regency/City",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/desa-kelurahan?kode_kabupaten_kota=3204&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "desa-kelurahan"],
+              "query": [
+                {
+                  "key": "kode_kabupaten_kota",
+                  "value": "3204"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar desa/kelurahan dalam kabupaten/kota tertentu."
+          }
+        },
+        {
+          "name": "Search Villages",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/desa-kelurahan?kode_kecamatan=320401&search=pasirkaliki",
+              "host": ["{{base_url}}"],
+              "path": ["api", "desa-kelurahan"],
+              "query": [
+                {
+                  "key": "kode_kecamatan",
+                  "value": "320401"
+                },
+                {
+                  "key": "search",
+                  "value": "pasirkaliki"
+                }
+              ]
+            },
+            "description": "Mencari desa/kelurahan berdasarkan nama."
+          }
+        },
+        {
+          "name": "Get Village Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/desa-kelurahan/3204010001",
+              "host": ["{{base_url}}"],
+              "path": ["api", "desa-kelurahan", "3204010001"]
+            },
+            "description": "Mendapatkan detail desa/kelurahan berdasarkan kode."
+          }
+        }
+      ],
+      "description": "Endpoints untuk data desa/kelurahan"
+    },
+    {
+      "name": "Islands (Pulau)",
+      "item": [
+        {
+          "name": "Get All Islands",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/pulau?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pulau"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar semua pulau."
+          }
+        },
+        {
+          "name": "Get Islands by Province",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/pulau?kode_provinsi=32",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pulau"],
+              "query": [
+                {
+                  "key": "kode_provinsi",
+                  "value": "32"
+                }
+              ]
+            },
+            "description": "Mendapatkan daftar pulau dalam provinsi tertentu."
+          }
+        },
+        {
+          "name": "Search Islands",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/pulau?search=java&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pulau"],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "java"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Mencari pulau berdasarkan nama."
+          }
+        },
+        {
+          "name": "Get Island Detail",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/indonesian-maps/pulau/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "pulau", "1"]
+            },
+            "description": "Mendapatkan detail pulau berdasarkan ID."
+          }
+        }
+      ],
+      "description": "Endpoints untuk data pulau"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test(\"Status code is 200\", function () {",
+          "    pm.response.to.have.status(200);",
+          "});",
+          "",
+          "pm.test(\"Response has success field\", function () {",
+          "    var jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('success');",
+          "});",
+          "",
+          "pm.test(\"Response is successful\", function () {",
+          "    var jsonData = pm.response.json();",
+          "    pm.expect(jsonData.success).to.be.true;",
+          "});",
+          "",
+          "pm.test(\"Response has data field\", function () {",
+          "    var jsonData = pm.response.json();",
+          "    pm.expect(jsonData).to.have.property('data');",
+          "});",
+          "",
+          "pm.test(\"Response time is less than 2000ms\", function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "https://api.sukmaaji.my.id",
+      "type": "string"
+    }
+  ]
+}
