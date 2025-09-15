@@ -802,15 +802,40 @@ const mapManager = {
         try {
             if (geoData && geoData.path) {
                 // Remove existing boundary
-                if (provinceBoundaryLayer) {
-                    map.removeLayer(provinceBoundaryLayer);
+                if (provinceBoundariesLayer) {
+                    map.removeLayer(provinceBoundariesLayer);
                 }
 
-                // Parse path string to coordinates array
-                const pathCoordinates = JSON.parse(geoData.path);
+                let pathProvinceCoordinates;
+                if (typeof geoData.path === 'string') {
+                    try {
+                        pathProvinceCoordinates = JSON.parse(geoData.path);
+                    } catch (e) {
+                        console.warn('Province path JSON parse failed:', e);
+                        return;
+                    }
+                } else if (Array.isArray(geoData.path)) {
+                    pathProvinceCoordinates = geoData.path;
+                } else {
+                    console.warn('Province path format not recognized:', geoData.path);
+                    return;
+                }
 
-                // Create polygon from coordinates
-                provinceBoundaryLayer = L.polygon(pathCoordinates, {
+                // Ensure path is array of [lat, lng]
+                if (!Array.isArray(pathProvinceCoordinates)) {
+                    console.warn('Province path is not a valid polygon:', pathProvinceCoordinates);
+                    return;
+                }
+
+                // If path is nested (e.g. [ [ [lat, lng], ... ] ]), flatten one level
+                if (Array.isArray(pathProvinceCoordinates[0]) && Array.isArray(pathProvinceCoordinates[0][0])) {
+                    pathProvinceCoordinates = pathProvinceCoordinates[0];
+                }
+
+                // Convert all coordinates to numbers and ensure [lat, lng] order
+                pathProvinceCoordinates = pathProvinceCoordinates.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
+
+                provinceBoundariesLayer = L.polygon(pathProvinceCoordinates, {
                     color: '#ff0000',
                     weight: 2,
                     opacity: 0.8,
@@ -827,15 +852,40 @@ const mapManager = {
         try {
             if (geoData && geoData.path) {
                 // Remove existing boundary
-                if (cityBoundaryLayer) {
-                    map.removeLayer(cityBoundaryLayer);
+                if (cityBoundariesLayer) {
+                    map.removeLayer(cityBoundariesLayer);
                 }
 
-                // Parse path string to coordinates array
-                const pathCoordinates = JSON.parse(geoData.path);
+                let pathCoordinates;
+                if (typeof geoData.path === 'string') {
+                    try {
+                        pathCoordinates = JSON.parse(geoData.path);
+                    } catch (e) {
+                        console.warn('City path JSON parse failed:', e);
+                        return;
+                    }
+                } else if (Array.isArray(geoData.path)) {
+                    pathCoordinates = geoData.path;
+                } else {
+                    console.warn('City path format not recognized:', geoData.path);
+                    return;
+                }
 
-                // Create polygon from coordinates
-                cityBoundaryLayer = L.polygon(pathCoordinates, {
+                // Ensure path is array of [lat, lng]
+                if (!Array.isArray(pathCoordinates)) {
+                    console.warn('City path is not a valid polygon:', pathCoordinates);
+                    return;
+                }
+
+                // If path is nested (e.g. [ [ [lat, lng], ... ] ]), flatten one level
+                if (Array.isArray(pathCoordinates[0]) && Array.isArray(pathCoordinates[0][0])) {
+                    pathCoordinates = pathCoordinates[0];
+                }
+
+                // Convert all coordinates to numbers and ensure [lat, lng] order
+                pathCoordinates = pathCoordinates.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
+
+                cityBoundariesLayer = L.polygon(pathCoordinates, {
                     color: '#0066cc',
                     weight: 2,
                     opacity: 0.8,
