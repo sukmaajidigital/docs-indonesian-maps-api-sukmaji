@@ -544,7 +544,7 @@ const mapManager = {
                     if (cityGeoResponse.success && cityGeoResponse.data) {
                         const cityLat = parseFloat(cityGeoResponse.data.lat);
                         const cityLng = parseFloat(cityGeoResponse.data.lng);
-                        
+
                         // Add small random offset for district marker
                         const districtLat = cityLat + (Math.random() - 0.5) * 0.1;
                         const districtLng = cityLng + (Math.random() - 0.5) * 0.1;
@@ -630,7 +630,7 @@ const mapManager = {
                     if (cityGeoResponse.success && cityGeoResponse.data) {
                         const cityLat = parseFloat(cityGeoResponse.data.lat);
                         const cityLng = parseFloat(cityGeoResponse.data.lng);
-                        
+
                         // Add larger random offset for village marker
                         const villageLat = cityLat + (Math.random() - 0.5) * 0.2;
                         const villageLng = cityLng + (Math.random() - 0.5) * 0.2;
