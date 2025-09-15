@@ -414,11 +414,8 @@ const mapManager = {
                     map.setView([lat, lng], 8);
                     this.showProvinceInfo(geoData);
 
-                    // Auto-show province boundary if toggle is enabled
-                    const provinceBoundaryToggle = document.getElementById('province-boundary-toggle');
-                    if (provinceBoundaryToggle && provinceBoundaryToggle.checked) {
-                        this.showProvinceBoundary(geoData);
-                    }
+                    // Automatically show province boundary
+                    this.showProvinceBoundary(geoData);
 
                     // Load cities for this province
                     await this.populateCitySelector(provinceCode);
@@ -500,11 +497,8 @@ const mapManager = {
                     // Pan to city with higher zoom
                     map.setView([lat, lng], 10);
 
-                    // Auto-show city boundary if toggle is enabled
-                    const cityBoundaryToggle = document.getElementById('city-boundary-toggle');
-                    if (cityBoundaryToggle && cityBoundaryToggle.checked) {
-                        this.showCityBoundary(geoData);
-                    }
+                    // Automatically show city boundary
+                    this.showCityBoundary(geoData);
 
                     // Load districts for this city
                     await this.populateDistrictSelector(cityCode);
@@ -793,84 +787,14 @@ const mapManager = {
             infoElement.style.display = 'none';
         }
 
-        // Reset boundary toggles
-        const provinceBoundaryToggle = document.getElementById('province-boundary-toggle');
-        const cityBoundaryToggle = document.getElementById('city-boundary-toggle');
-        if (provinceBoundaryToggle) provinceBoundaryToggle.checked = false;
-        if (cityBoundaryToggle) cityBoundaryToggle.checked = false;
-    },
-
-    async toggleProvinceBoundary(show) {
-        if (show && selectedLocation.province) {
-            try {
-                const geoResponse = await apiService.getProvinceGeo(selectedLocation.province);
-                if (geoResponse.success && geoResponse.data && geoResponse.data.path) {
-                    // Remove existing boundary
-                    if (provinceBoundaryLayer) {
-                        map.removeLayer(provinceBoundaryLayer);
-                    }
-
-                    // Parse path string to coordinates array
-                    const pathCoordinates = JSON.parse(geoResponse.data.path);
-
-                    // Create polygon from coordinates
-                    provinceBoundaryLayer = L.polygon(pathCoordinates, {
-                        color: '#ff0000',
-                        weight: 2,
-                        opacity: 0.8,
-                        fillOpacity: 0.1,
-                        fillColor: '#ff0000'
-                    }).addTo(map);
-
-                    // Fit map to boundary
-                    map.fitBounds(provinceBoundaryLayer.getBounds());
-                }
-            } catch (error) {
-                console.error('Error loading province boundary:', error);
-            }
-        } else {
-            // Remove boundary
-            if (provinceBoundaryLayer) {
-                map.removeLayer(provinceBoundaryLayer);
-                provinceBoundaryLayer = null;
-            }
+        // Clear boundary layers
+        if (provinceBoundaryLayer) {
+            map.removeLayer(provinceBoundaryLayer);
+            provinceBoundaryLayer = null;
         }
-    },
-
-    async toggleCityBoundary(show) {
-        if (show && selectedLocation.city) {
-            try {
-                const geoResponse = await apiService.getCityGeo(selectedLocation.city);
-                if (geoResponse.success && geoResponse.data && geoResponse.data.path) {
-                    // Remove existing boundary
-                    if (cityBoundaryLayer) {
-                        map.removeLayer(cityBoundaryLayer);
-                    }
-
-                    // Parse path string to coordinates array
-                    const pathCoordinates = JSON.parse(geoResponse.data.path);
-
-                    // Create polygon from coordinates
-                    cityBoundaryLayer = L.polygon(pathCoordinates, {
-                        color: '#0066cc',
-                        weight: 2,
-                        opacity: 0.8,
-                        fillOpacity: 0.15,
-                        fillColor: '#0066cc'
-                    }).addTo(map);
-
-                    // Fit map to boundary
-                    map.fitBounds(cityBoundaryLayer.getBounds());
-                }
-            } catch (error) {
-                console.error('Error loading city boundary:', error);
-            }
-        } else {
-            // Remove boundary
-            if (cityBoundaryLayer) {
-                map.removeLayer(cityBoundaryLayer);
-                cityBoundaryLayer = null;
-            }
+        if (cityBoundariesLayer) {
+            map.removeLayer(cityBoundariesLayer);
+            cityBoundariesLayer = null;
         }
     },
 
@@ -1308,22 +1232,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (villageSelector) {
         villageSelector.addEventListener('change', (e) => {
             mapManager.selectVillage(e.target.value);
-        });
-    }
-
-    // Province boundary toggle
-    const provinceBoundaryToggle = document.getElementById('province-boundary-toggle');
-    if (provinceBoundaryToggle) {
-        provinceBoundaryToggle.addEventListener('change', (e) => {
-            mapManager.toggleProvinceBoundary(e.target.checked);
-        });
-    }
-
-    // City boundary toggle
-    const cityBoundaryToggle = document.getElementById('city-boundary-toggle');
-    if (cityBoundaryToggle) {
-        cityBoundaryToggle.addEventListener('change', (e) => {
-            mapManager.toggleCityBoundary(e.target.checked);
         });
     }
 
