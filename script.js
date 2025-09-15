@@ -961,7 +961,7 @@ const visualizationManager = {
         this.loadProvincesTable();
         this.loadCharts();
         this.initTableSearch();
-        this.isInitialized = true;
+        // this.isInitialized = true;
     },
 
     async loadProvincesTable() {
