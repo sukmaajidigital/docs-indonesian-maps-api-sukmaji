@@ -150,24 +150,6 @@ const apiService = {
         return await this.fetchData(`/desa-kelurahan/${code}`);
     },
 
-    async getDistrictGeo(code) {
-        return await this.fetchData(`/kecamatan/${code}/geo`);
-    },
-
-    async getVillageGeo(code) {
-        return await this.fetchData(`/desa-kelurahan/${code}/geo`);
-    },
-
-    async getProvinceBoundary(code) {
-        // Note: Boundary API endpoints might need to be confirmed with actual API
-        return await this.fetchData(`/provinsi/${code}/boundary`);
-    },
-
-    async getCityBoundary(code) {
-        // Note: Boundary API endpoints might need to be confirmed with actual API
-        return await this.fetchData(`/kabupaten-kota/${code}/boundary`);
-    },
-
     async getIslands(limit = 50) {
         return await this.fetchData(`/pulau?limit=${limit}`);
     }
@@ -432,6 +414,12 @@ const mapManager = {
                     map.setView([lat, lng], 8);
                     this.showProvinceInfo(geoData);
 
+                    // Auto-show province boundary if toggle is enabled
+                    const provinceBoundaryToggle = document.getElementById('province-boundary-toggle');
+                    if (provinceBoundaryToggle && provinceBoundaryToggle.checked) {
+                        this.showProvinceBoundary(geoData);
+                    }
+
                     // Load cities for this province
                     await this.populateCitySelector(provinceCode);
                 }
@@ -490,11 +478,11 @@ const mapManager = {
 
                     const popupContent = `
                         <div class="popup-content">
-                            <h6 class="popup-title">${geoData.nama_kota_kabupaten}</h6>
+                            <h6 class="popup-title">${geoData.nama_kabupaten_kota}</h6>
                             <div class="popup-info">
                                 <div class="info-row">
                                     <span class="info-label">Type:</span>
-                                    <span class="info-value">${geoData.tipe}</span>
+                                    <span class="info-value">${geoData.tipe || 'N/A'}</span>
                                 </div>
                                 <div class="info-row">
                                     <span class="info-label">Population:</span>
@@ -511,6 +499,12 @@ const mapManager = {
 
                     // Pan to city with higher zoom
                     map.setView([lat, lng], 10);
+
+                    // Auto-show city boundary if toggle is enabled
+                    const cityBoundaryToggle = document.getElementById('city-boundary-toggle');
+                    if (cityBoundaryToggle && cityBoundaryToggle.checked) {
+                        this.showCityBoundary(geoData);
+                    }
 
                     // Load districts for this city
                     await this.populateDistrictSelector(cityCode);
@@ -538,56 +532,71 @@ const mapManager = {
             selectedLocation.district = districtCode;
             selectedLocation.village = null;
 
-            const geoResponse = await apiService.getDistrictGeo(districtCode);
-            if (geoResponse.success && geoResponse.data) {
-                const geoData = geoResponse.data;
-                const lat = parseFloat(geoData.lat);
-                const lng = parseFloat(geoData.lng);
+            // Get district detail from list endpoint
+            const detailResponse = await apiService.getDistrictDetail(districtCode);
+            if (detailResponse.success && detailResponse.data) {
+                const districtData = detailResponse.data;
 
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    // Remove existing district layer if any
-                    if (currentDistrictLayer) {
-                        map.removeLayer(currentDistrictLayer);
-                    }
+                // For districts, we'll place marker at city center with slight offset
+                // since district geo endpoint is not available
+                if (selectedLocation.city) {
+                    const cityGeoResponse = await apiService.getCityGeo(selectedLocation.city);
+                    if (cityGeoResponse.success && cityGeoResponse.data) {
+                        const cityLat = parseFloat(cityGeoResponse.data.lat);
+                        const cityLng = parseFloat(cityGeoResponse.data.lng);
+                        
+                        // Add small random offset for district marker
+                        const districtLat = cityLat + (Math.random() - 0.5) * 0.1;
+                        const districtLng = cityLng + (Math.random() - 0.5) * 0.1;
 
-                    // Add marker for selected district
-                    currentDistrictLayer = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map);
+                        // Remove existing district layer if any
+                        if (currentDistrictLayer) {
+                            map.removeLayer(currentDistrictLayer);
+                        }
 
-                    const popupContent = `
-                        <div class="popup-content">
-                            <h6 class="popup-title">${geoData.nama_kecamatan}</h6>
-                            <div class="popup-info">
-                                <div class="info-row">
-                                    <span class="info-label">District Code:</span>
-                                    <span class="info-value">${geoData.kode_kecamatan}</span>
+                        // Add marker for selected district
+                        currentDistrictLayer = L.marker([districtLat, districtLng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map);
+
+                        const popupContent = `
+                            <div class="popup-content">
+                                <h6 class="popup-title">${districtData.nama_kecamatan}</h6>
+                                <div class="popup-info">
+                                    <div class="info-row">
+                                        <span class="info-label">District Code:</span>
+                                        <span class="info-value">${districtData.kode_kecamatan}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">City/Regency:</span>
+                                        <span class="info-value">${districtData.nama_kabupaten_kota || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Province:</span>
+                                        <span class="info-value">${districtData.nama_provinsi || 'N/A'}</span>
+                                    </div>
                                 </div>
-                                <div class="info-row">
-                                    <span class="info-label">Population:</span>
-                                    <span class="info-value">${utils.formatPopulation(geoData.penduduk)}</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-label">Area:</span>
-                                    <span class="info-value">${utils.formatArea(geoData.luas)}</span>
-                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Approximate location (exact coordinates not available)
+                                </small>
                             </div>
-                        </div>
-                    `;
-                    currentDistrictLayer.bindPopup(popupContent).openPopup();
+                        `;
+                        currentDistrictLayer.bindPopup(popupContent).openPopup();
 
-                    // Pan to district with higher zoom
-                    map.setView([lat, lng], 12);
+                        // Pan to district with higher zoom
+                        map.setView([districtLat, districtLng], 12);
 
-                    // Load villages for this district
-                    await this.populateVillageSelector(districtCode);
+                        // Load villages for this district
+                        await this.populateVillageSelector(districtCode);
+                    }
                 }
             }
         } catch (error) {
@@ -609,53 +618,72 @@ const mapManager = {
         try {
             selectedLocation.village = villageCode;
 
-            const geoResponse = await apiService.getVillageGeo(villageCode);
-            if (geoResponse.success && geoResponse.data) {
-                const geoData = geoResponse.data;
-                const lat = parseFloat(geoData.lat);
-                const lng = parseFloat(geoData.lng);
+            // Get village detail from list endpoint
+            const detailResponse = await apiService.getVillageDetail(villageCode);
+            if (detailResponse.success && detailResponse.data) {
+                const villageData = detailResponse.data;
 
-                if (!isNaN(lat) && !isNaN(lng)) {
-                    // Remove existing village layer if any
-                    if (currentVillageLayer) {
-                        map.removeLayer(currentVillageLayer);
-                    }
+                // For villages, we'll place marker near district center with slight offset
+                // since village geo endpoint is not available
+                if (selectedLocation.city) {
+                    const cityGeoResponse = await apiService.getCityGeo(selectedLocation.city);
+                    if (cityGeoResponse.success && cityGeoResponse.data) {
+                        const cityLat = parseFloat(cityGeoResponse.data.lat);
+                        const cityLng = parseFloat(cityGeoResponse.data.lng);
+                        
+                        // Add larger random offset for village marker
+                        const villageLat = cityLat + (Math.random() - 0.5) * 0.2;
+                        const villageLng = cityLng + (Math.random() - 0.5) * 0.2;
 
-                    // Add marker for selected village
-                    currentVillageLayer = L.marker([lat, lng], {
-                        icon: L.icon({
-                            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-                            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34],
-                            shadowSize: [41, 41]
-                        })
-                    }).addTo(map);
+                        // Remove existing village layer if any
+                        if (currentVillageLayer) {
+                            map.removeLayer(currentVillageLayer);
+                        }
 
-                    const popupContent = `
-                        <div class="popup-content">
-                            <h6 class="popup-title">${geoData.nama_desa_kelurahan}</h6>
-                            <div class="popup-info">
-                                <div class="info-row">
-                                    <span class="info-label">Village Code:</span>
-                                    <span class="info-value">${geoData.kode_desa_kelurahan}</span>
+                        // Add marker for selected village
+                        currentVillageLayer = L.marker([villageLat, villageLng], {
+                            icon: L.icon({
+                                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+                                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                                iconSize: [25, 41],
+                                iconAnchor: [12, 41],
+                                popupAnchor: [1, -34],
+                                shadowSize: [41, 41]
+                            })
+                        }).addTo(map);
+
+                        const popupContent = `
+                            <div class="popup-content">
+                                <h6 class="popup-title">${villageData.nama_desa_kelurahan}</h6>
+                                <div class="popup-info">
+                                    <div class="info-row">
+                                        <span class="info-label">Village Code:</span>
+                                        <span class="info-value">${villageData.kode_desa_kelurahan}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">District:</span>
+                                        <span class="info-value">${villageData.nama_kecamatan || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">City/Regency:</span>
+                                        <span class="info-value">${villageData.nama_kabupaten_kota || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Province:</span>
+                                        <span class="info-value">${villageData.nama_provinsi || 'N/A'}</span>
+                                    </div>
                                 </div>
-                                <div class="info-row">
-                                    <span class="info-label">Population:</span>
-                                    <span class="info-value">${utils.formatPopulation(geoData.penduduk)}</span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-label">Area:</span>
-                                    <span class="info-value">${utils.formatArea(geoData.luas)}</span>
-                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Approximate location (exact coordinates not available)
+                                </small>
                             </div>
-                        </div>
-                    `;
-                    currentVillageLayer.bindPopup(popupContent).openPopup();
+                        `;
+                        currentVillageLayer.bindPopup(popupContent).openPopup();
 
-                    // Pan to village with highest zoom
-                    map.setView([lat, lng], 14);
+                        // Pan to village with highest zoom
+                        map.setView([villageLat, villageLng], 14);
+                    }
                 }
             }
         } catch (error) {
@@ -775,21 +803,23 @@ const mapManager = {
     async toggleProvinceBoundary(show) {
         if (show && selectedLocation.province) {
             try {
-                const boundaryResponse = await apiService.getProvinceBoundary(selectedLocation.province);
-                if (boundaryResponse.success && boundaryResponse.data && boundaryResponse.data.boundaries) {
+                const geoResponse = await apiService.getProvinceGeo(selectedLocation.province);
+                if (geoResponse.success && geoResponse.data && geoResponse.data.path) {
                     // Remove existing boundary
                     if (provinceBoundaryLayer) {
                         map.removeLayer(provinceBoundaryLayer);
                     }
 
-                    // Add new boundary
-                    provinceBoundaryLayer = L.geoJSON(boundaryResponse.data.boundaries, {
-                        style: {
-                            color: '#ff0000',
-                            weight: 2,
-                            opacity: 0.8,
-                            fillOpacity: 0.1
-                        }
+                    // Parse path string to coordinates array
+                    const pathCoordinates = JSON.parse(geoResponse.data.path);
+
+                    // Create polygon from coordinates
+                    provinceBoundaryLayer = L.polygon(pathCoordinates, {
+                        color: '#ff0000',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.1,
+                        fillColor: '#ff0000'
                     }).addTo(map);
 
                     // Fit map to boundary
@@ -810,21 +840,23 @@ const mapManager = {
     async toggleCityBoundary(show) {
         if (show && selectedLocation.city) {
             try {
-                const boundaryResponse = await apiService.getCityBoundary(selectedLocation.city);
-                if (boundaryResponse.success && boundaryResponse.data && boundaryResponse.data.boundaries) {
+                const geoResponse = await apiService.getCityGeo(selectedLocation.city);
+                if (geoResponse.success && geoResponse.data && geoResponse.data.path) {
                     // Remove existing boundary
                     if (cityBoundaryLayer) {
                         map.removeLayer(cityBoundaryLayer);
                     }
 
-                    // Add new boundary
-                    cityBoundaryLayer = L.geoJSON(boundaryResponse.data.boundaries, {
-                        style: {
-                            color: '#0066cc',
-                            weight: 2,
-                            opacity: 0.8,
-                            fillOpacity: 0.15
-                        }
+                    // Parse path string to coordinates array
+                    const pathCoordinates = JSON.parse(geoResponse.data.path);
+
+                    // Create polygon from coordinates
+                    cityBoundaryLayer = L.polygon(pathCoordinates, {
+                        color: '#0066cc',
+                        weight: 2,
+                        opacity: 0.8,
+                        fillOpacity: 0.15,
+                        fillColor: '#0066cc'
                     }).addTo(map);
 
                     // Fit map to boundary
@@ -839,6 +871,56 @@ const mapManager = {
                 map.removeLayer(cityBoundaryLayer);
                 cityBoundaryLayer = null;
             }
+        }
+    },
+
+    showProvinceBoundary(geoData) {
+        try {
+            if (geoData && geoData.path) {
+                // Remove existing boundary
+                if (provinceBoundaryLayer) {
+                    map.removeLayer(provinceBoundaryLayer);
+                }
+
+                // Parse path string to coordinates array
+                const pathCoordinates = JSON.parse(geoData.path);
+
+                // Create polygon from coordinates
+                provinceBoundaryLayer = L.polygon(pathCoordinates, {
+                    color: '#ff0000',
+                    weight: 2,
+                    opacity: 0.8,
+                    fillOpacity: 0.1,
+                    fillColor: '#ff0000'
+                }).addTo(map);
+            }
+        } catch (error) {
+            console.error('Error showing province boundary:', error);
+        }
+    },
+
+    showCityBoundary(geoData) {
+        try {
+            if (geoData && geoData.path) {
+                // Remove existing boundary
+                if (cityBoundaryLayer) {
+                    map.removeLayer(cityBoundaryLayer);
+                }
+
+                // Parse path string to coordinates array
+                const pathCoordinates = JSON.parse(geoData.path);
+
+                // Create polygon from coordinates
+                cityBoundaryLayer = L.polygon(pathCoordinates, {
+                    color: '#0066cc',
+                    weight: 2,
+                    opacity: 0.8,
+                    fillOpacity: 0.15,
+                    fillColor: '#0066cc'
+                }).addTo(map);
+            }
+        } catch (error) {
+            console.error('Error showing city boundary:', error);
         }
     }
 };
