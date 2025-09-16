@@ -821,21 +821,44 @@ const mapManager = {
                     return;
                 }
 
-                // Ensure path is array of [lat, lng]
-                if (!Array.isArray(pathProvinceCoordinates)) {
-                    console.warn('Province path is not a valid polygon:', pathProvinceCoordinates);
+                // If path is multi-polygon (array of arrays), render all polygons
+                let polygons = [];
+                if (Array.isArray(pathProvinceCoordinates[0][0])) {
+                    // Multi-polygon: array of polygons
+                    polygons = pathProvinceCoordinates.map(poly => {
+                        // Validate and clean coordinates
+                        let coords = poly.filter(pt => Array.isArray(pt) && pt.length === 2 && !isNaN(pt[0]) && !isNaN(pt[1]));
+                        coords = coords.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
+                        // Ensure polygon has at least 3 points
+                        if (coords.length < 3) return null;
+                        // Ensure polygon is closed
+                        const first = coords[0];
+                        const last = coords[coords.length - 1];
+                        if (first[0] !== last[0] || first[1] !== last[1]) {
+                            coords.push([first[0], first[1]]);
+                        }
+                        return coords;
+                    }).filter(Boolean);
+                } else {
+                    // Single polygon
+                    let coords = pathProvinceCoordinates.filter(pt => Array.isArray(pt) && pt.length === 2 && !isNaN(pt[0]) && !isNaN(pt[1]));
+                    coords = coords.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
+                    if (coords.length >= 3) {
+                        const first = coords[0];
+                        const last = coords[coords.length - 1];
+                        if (first[0] !== last[0] || first[1] !== last[1]) {
+                            coords.push([first[0], first[1]]);
+                        }
+                        polygons = [coords];
+                    }
+                }
+
+                if (polygons.length === 0) {
+                    console.warn('Province path is not a valid polygon or multi-polygon:', pathProvinceCoordinates);
                     return;
                 }
 
-                // If path is nested (e.g. [ [ [lat, lng], ... ] ]), flatten one level
-                if (Array.isArray(pathProvinceCoordinates[0]) && Array.isArray(pathProvinceCoordinates[0][0])) {
-                    pathProvinceCoordinates = pathProvinceCoordinates[0];
-                }
-
-                // Convert all coordinates to numbers and ensure [lat, lng] order
-                pathProvinceCoordinates = pathProvinceCoordinates.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
-
-                provinceBoundariesLayer = L.polygon(pathProvinceCoordinates, {
+                provinceBoundariesLayer = L.polygon(polygons, {
                     color: '#ff0000',
                     weight: 2,
                     opacity: 0.8,
@@ -871,21 +894,44 @@ const mapManager = {
                     return;
                 }
 
-                // Ensure path is array of [lat, lng]
-                if (!Array.isArray(pathCoordinates)) {
-                    console.warn('City path is not a valid polygon:', pathCoordinates);
+                // If path is multi-polygon (array of arrays), render all polygons
+                let polygons = [];
+                if (Array.isArray(pathCoordinates[0][0])) {
+                    // Multi-polygon: array of polygons
+                    polygons = pathCoordinates.map(poly => {
+                        // Validate and clean coordinates
+                        let coords = poly.filter(pt => Array.isArray(pt) && pt.length === 2 && !isNaN(pt[0]) && !isNaN(pt[1]));
+                        coords = coords.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
+                        // Ensure polygon has at least 3 points
+                        if (coords.length < 3) return null;
+                        // Ensure polygon is closed
+                        const first = coords[0];
+                        const last = coords[coords.length - 1];
+                        if (first[0] !== last[0] || first[1] !== last[1]) {
+                            coords.push([first[0], first[1]]);
+                        }
+                        return coords;
+                    }).filter(Boolean);
+                } else {
+                    // Single polygon
+                    let coords = pathCoordinates.filter(pt => Array.isArray(pt) && pt.length === 2 && !isNaN(pt[0]) && !isNaN(pt[1]));
+                    coords = coords.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
+                    if (coords.length >= 3) {
+                        const first = coords[0];
+                        const last = coords[coords.length - 1];
+                        if (first[0] !== last[0] || first[1] !== last[1]) {
+                            coords.push([first[0], first[1]]);
+                        }
+                        polygons = [coords];
+                    }
+                }
+
+                if (polygons.length === 0) {
+                    console.warn('City path is not a valid polygon or multi-polygon:', pathCoordinates);
                     return;
                 }
 
-                // If path is nested (e.g. [ [ [lat, lng], ... ] ]), flatten one level
-                if (Array.isArray(pathCoordinates[0]) && Array.isArray(pathCoordinates[0][0])) {
-                    pathCoordinates = pathCoordinates[0];
-                }
-
-                // Convert all coordinates to numbers and ensure [lat, lng] order
-                pathCoordinates = pathCoordinates.map(pt => [parseFloat(pt[0]), parseFloat(pt[1])]);
-
-                cityBoundariesLayer = L.polygon(pathCoordinates, {
+                cityBoundariesLayer = L.polygon(polygons, {
                     color: '#0066cc',
                     weight: 2,
                     opacity: 0.8,
