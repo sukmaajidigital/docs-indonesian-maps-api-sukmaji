@@ -159,11 +159,11 @@ The website can be configured by modifying the `CONFIG` object in `script.js`:
 ```javascript
 const CONFIG = {
   API_BASE_URL: "https://api.sukmaaji.my.id/indonesian-maps",
-  DEFAULT_COORDINATE: [-6.2088, 106.8456], // Jakarta
-  DEFAULT_ZOOM: 5,
+  DEFAULT_COORDINATE: [-6.8055, 110.8392], // Kudus, Jawa Tengah
+  DEFAULT_ZOOM: 4,
   INDONESIA_BOUNDS: [
-    [-11, 95],
-    [6, 141],
+    [-13, 93],
+    [8, 145],
   ],
 };
 ```
