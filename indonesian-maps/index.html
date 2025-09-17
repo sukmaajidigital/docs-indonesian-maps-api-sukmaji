@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Indonesian Maps API - Documentation</title>
+    <title>Indonesian Maps API - Dokumentasi</title>
     <meta
       name="description"
-      content="Complete documentation for Indonesian Maps API - RESTful API for Indonesian geographical and administrative data"
+      content="Dokumentasi lengkap untuk Indonesian Maps API - RESTful API untuk data geografis dan administratif Indonesia"
     />
     <meta
       name="keywords"
-      content="Indonesia, maps, API, geographical data, administrative regions, provinces, cities, districts"
+      content="Indonesia, peta, API, data geografis, wilayah administrasi, provinsi, kota, kabupaten, kecamatan"
     />
     <meta name="author" content="Sukma Aji Digital" />
 
@@ -21,7 +21,10 @@
       href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>"
     />
 
-    <!-- External CSS -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- External CSS for Leaflet & Prism -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -34,129 +37,187 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-    />
-    <link
-      rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-      <div class="container">
-        <a class="navbar-brand" href="#home">
-          <i class="fas fa-map-marked-alt me-2"></i>
-          Indonesian Maps API
-        </a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#home">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#overview">Overview</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#documentation">Documentation</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#demo">Demo</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#map">Interactive Map</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="https://github.com/sukmaajidigital" target="_blank">
-                <i class="fab fa-github"></i> GitHub
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero-section">
-      <div class="container">
-        <div class="row align-items-center min-vh-100">
-          <div class="col-lg-6">
-            <div class="hero-content">
-              <h1 class="display-4 fw-bold mb-4">Indonesian Maps API</h1>
-              <p class="lead mb-4">
-                Comprehensive RESTful API for Indonesian geographical and administrative data.
-                Access detailed information about provinces, cities, districts, villages, and
-                islands with complete demographic and geographic data.
-              </p>
-              <div class="hero-stats mb-4">
-                <div class="row text-center">
-                  <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                      <h3 class="text-primary">38</h3>
-                      <p>Provinces</p>
-                    </div>
-                  </div>
-                  <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                      <h3 class="text-primary">501+</h3>
-                      <p>Cities/Regencies</p>
-                    </div>
-                  </div>
-                  <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                      <h3 class="text-primary">17K+</h3>
-                      <p>Islands</p>
-                    </div>
-                  </div>
-                  <div class="col-md-3 col-6">
-                    <div class="stat-item">
-                      <h3 class="text-primary">16</h3>
-                      <p>Endpoints</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div class="hero-buttons">
-                <a href="#documentation" class="btn btn-primary btn-lg me-3">
-                  <i class="fas fa-book me-2"></i>Get Started
-                </a>
-                <a href="#demo" class="btn btn-outline-primary btn-lg">
-                  <i class="fas fa-play me-2"></i>Try Demo
-                </a>
-              </div>
-            </div>
+    <!-- Custom Styles -->
+    <style>
+      /* Custom scrollbar for better aesthetics */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #3b82f6;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #2563eb;
+      }
+      /* Leaflet map container height */
+      #indonesia-map {
+        height: 75vh;
+      }
+      .leaflet-popup-content-wrapper {
+        border-radius: 0.5rem;
+      }
+      /* Style for PrismJS code blocks */
+      pre[class*="language-"] {
+        border-radius: 0.5rem;
+        padding: 1.25rem !important;
+        font-size: 0.875rem;
+      }
+      .endpoint-card[open] .endpoint-summary svg {
+        transform: rotate(180deg);
+      }
+    </style>
+    <script>
+      // Konfigurasi Tailwind CSS
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="bg-slate-50 font-sans">
+    <div>
+      <!-- Mobile top bar -->
+      <div class="bg-gray-800 text-gray-100 flex justify-between md:hidden sticky top-0 z-40">
+        <a href="#home" class="block p-4 text-white font-bold">Indonesian Maps API</a>
+        <button id="mobile-menu-button" class="p-4 focus:outline-none focus:bg-gray-700">
+          <i id="mobile-menu-icon" class="fas fa-bars"></i>
+        </button>
+      </div>
+
+      <!-- Sidebar -->
+      <div>
+        <!-- Backdrop -->
+        <div
+          id="sidebar-backdrop"
+          class="fixed inset-0 bg-black bg-opacity-50 hidden md:hidden z-30"
+        ></div>
+        <!-- Sidebar -->
+        <aside
+          id="sidebar"
+          class="bg-gray-800 text-gray-100 w-64 flex flex-col fixed inset-y-0 left-0 transform -translate-x-full md:translate-x-0 transition duration-300 ease-in-out z-40"
+        >
+          <div class="p-4 border-b border-gray-700">
+            <a href="#home" class="text-white flex items-center space-x-2">
+              <i class="fas fa-map-marked-alt text-2xl"></i>
+              <span class="text-xl font-extrabold">Indonesian Maps API</span>
+            </a>
           </div>
-          <div class="col-lg-6">
-            <div class="hero-image">
-              <div class="api-preview-card">
-                <div class="card-header">
-                  <div class="d-flex align-items-center">
-                    <div class="dot bg-danger"></div>
-                    <div class="dot bg-warning"></div>
-                    <div class="dot bg-success"></div>
-                    <span class="ms-3 text-muted">api.sukmaaji.my.id</span>
+          <nav class="flex-1 overflow-y-auto space-y-2 py-4 px-2">
+            <a
+              href="#home"
+              class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white"
+              >Home</a
+            >
+            <a
+              href="#overview"
+              class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white"
+              >Overview</a
+            >
+            <a
+              href="#documentation"
+              class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white"
+              >Dokumentasi</a
+            >
+            <a
+              href="#demo"
+              class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white"
+              >Demo</a
+            >
+            <a
+              href="#map"
+              class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white"
+              >Peta Interaktif</a
+            >
+            <a
+              href="https://github.com/sukmaajidigital"
+              target="_blank"
+              class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white"
+            >
+              <i class="fab fa-github mr-2"></i> GitHub
+            </a>
+          </nav>
+        </aside>
+      </div>
+
+      <!-- Content -->
+      <main class="md:ml-64 p-4 sm:p-6 lg:p-10">
+        <!-- Hero Section -->
+        <section id="home" class="min-h-screen flex items-center -mt-16 md:-mt-10">
+          <div class="container mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+              <div class="hero-content">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800 mb-4 leading-tight">
+                  Indonesian Maps API
+                </h1>
+                <p class="text-lg text-gray-600 mb-6">
+                  RESTful API komprehensif untuk data geografis dan administratif Indonesia. Akses
+                  informasi detail tentang provinsi, kota, kecamatan, desa, dan pulau dengan data
+                  demografi dan geografis lengkap.
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 text-center">
+                  <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-3xl font-bold text-blue-600">38</h3>
+                    <p class="text-gray-500">Provinsi</p>
+                  </div>
+                  <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-3xl font-bold text-blue-600">501+</h3>
+                    <p class="text-gray-500">Kota/Kab</p>
+                  </div>
+                  <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-3xl font-bold text-blue-600">17K+</h3>
+                    <p class="text-gray-500">Pulau</p>
+                  </div>
+                  <div class="bg-white p-4 rounded-lg shadow-md">
+                    <h3 class="text-3xl font-bold text-blue-600">16</h3>
+                    <p class="text-gray-500">Endpoint</p>
                   </div>
                 </div>
-                <div class="card-body">
+                <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                  <a
+                    href="#documentation"
+                    class="w-full sm:w-auto text-center bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition duration-300 shadow-lg"
+                  >
+                    <i class="fas fa-book mr-2"></i>Mulai
+                  </a>
+                  <a
+                    href="#demo"
+                    class="w-full sm:w-auto text-center bg-gray-200 text-gray-800 font-bold py-3 px-8 rounded-full hover:bg-gray-300 transition duration-300"
+                  >
+                    <i class="fas fa-play mr-2"></i>Coba Demo
+                  </a>
+                </div>
+              </div>
+              <div class="hidden lg:block">
+                <div class="bg-gray-800 rounded-lg shadow-2xl overflow-hidden">
+                  <div class="bg-gray-700 p-3 flex items-center">
+                    <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                    <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <span class="ml-auto text-sm text-gray-400">api.sukmaaji.my.id</span>
+                  </div>
                   <pre><code class="language-json">{
   "success": true,
   "data": {
     "kode_provinsi": 32,
     "nama_provinsi": "Jawa Barat",
     "ibukota": "Bandung",
-    "lat": "-6.902224715926122",
-    "lng": "107.6187597542088",
-    "luas": "37053.331",
-    "penduduk": "51316378.0"
+    "lat": "-6.9022",
+    "lng": "107.6187",
+    "luas": "37053.33",
+    "penduduk": "51316378"
   },
   "message": "Success"
 }</code></pre>
@@ -164,705 +225,1102 @@
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
 
-    <!-- Overview Section -->
-    <section id="overview" class="py-5">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center mb-5">
-            <h2 class="display-5 fw-bold mb-4">API Overview</h2>
-            <p class="lead">
-              The Indonesian Maps API provides comprehensive access to geographical and
-              administrative data for Indonesia, including provinces, cities, districts, villages,
-              and islands.
+        <!-- Overview Section -->
+        <section id="overview" class="py-20">
+          <div class="container mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">API Overview</h2>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto mb-12">
+              Indonesian Maps API menyediakan akses komprehensif ke data geografis dan administratif
+              untuk Indonesia, termasuk provinsi, kota, kecamatan, desa, dan pulau.
             </p>
-          </div>
-        </div>
-
-        <div class="row g-4 mb-5">
-          <div class="col-lg-4">
-            <div class="feature-card h-100">
-              <div class="feature-icon">
-                <i class="fas fa-map-marked-alt"></i>
-              </div>
-              <h4>Complete Geographic Data</h4>
-              <p>
-                Access detailed information about all administrative levels in Indonesia, from
-                provinces down to villages.
-              </p>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="feature-card h-100">
-              <div class="feature-icon">
-                <i class="fas fa-chart-line"></i>
-              </div>
-              <h4>Demographic Information</h4>
-              <p>
-                Get population data, area measurements, and other demographic statistics for each
-                region.
-              </p>
-            </div>
-          </div>
-          <div class="col-lg-4">
-            <div class="feature-card h-100">
-              <div class="feature-icon">
-                <i class="fas fa-search"></i>
-              </div>
-              <h4>Search & Filter</h4>
-              <p>
-                Advanced search functionality with pagination and hierarchical filtering
-                capabilities.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- API Information -->
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="api-info-card">
-              <div class="row">
-                <div class="col-md-6">
-                  <h5><i class="fas fa-server me-2"></i>Base URL</h5>
-                  <code class="fs-6">https://api.sukmaaji.my.id/indonesian-maps</code>
-                </div>
-                <div class="col-md-6">
-                  <h5><i class="fas fa-code me-2"></i>Response Format</h5>
-                  <span class="badge bg-success">JSON</span>
-                  <span class="badge bg-info">UTF-8</span>
-                </div>
-              </div>
-              <hr />
-              <div class="row">
-                <div class="col-md-6">
-                  <h5><i class="fas fa-shield-alt me-2"></i>Authentication</h5>
-                  <span class="badge bg-secondary">None Required</span>
-                </div>
-                <div class="col-md-6">
-                  <h5><i class="fas fa-tachometer-alt me-2"></i>Rate Limiting</h5>
-                  <span class="badge bg-warning text-dark">No Limits</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Documentation Section -->
-    <section id="documentation" class="py-5 bg-light">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center mb-5">
-            <h2 class="display-5 fw-bold mb-4">API Documentation</h2>
-            <p class="lead">Complete reference for all available endpoints</p>
-          </div>
-        </div>
-
-        <!-- Endpoints Documentation -->
-        <div class="endpoints-documentation">
-          <!-- Provinces Endpoints -->
-          <div class="endpoint-section mb-5">
-            <h3 class="section-title"><i class="fas fa-map me-2"></i>Provinces (Provinsi)</h3>
-            <div class="alert alert-success">
-              <i class="fas fa-check-circle me-2"></i>
-              <strong>Available:</strong> Geographic coordinates and boundary path data are
-              available for province endpoints.
-            </div>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/provinsi</code>
-                <span class="endpoint-description">Get all provinces</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <h6>Query Parameters</h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>page</code></td>
-                            <td>integer</td>
-                            <td>Page number (default: 1)</td>
-                          </tr>
-                          <tr>
-                            <td><code>limit</code></td>
-                            <td>integer</td>
-                            <td>Items per page (default: 50, max: 1000)</td>
-                          </tr>
-                          <tr>
-                            <td><code>search</code></td>
-                            <td>string</td>
-                            <td>Search by province name</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <h6>Example Response</h6>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": [
-    {
-      "kode_provinsi": 32,
-      "nama_provinsi": "Jawa Barat"
-    }
-  ],
-  "message": "Successfully retrieved 38 provinces",
-  "total": 38,
-  "page": 1,
-  "limit": 50,
-  "totalPages": 1
-}</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/provinsi/{code}</code>
-                <span class="endpoint-description">Get province detail</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <h6>Path Parameters</h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>code</code></td>
-                            <td>integer</td>
-                            <td>Province code (e.g., 32 for West Java)</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <h6>Example Response</h6>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": {
-    "kode_provinsi": 32,
-    "nama_provinsi": "Jawa Barat"
-  },
-  "message": "Successfully retrieved province Jawa Barat"
-}</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/provinsi/{code}/geo</code>
-                <span class="endpoint-description">Get province geographical data</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-12">
-                    <h6>Example Response</h6>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": {
-    "kode_provinsi": "32",
-    "nama_provinsi": "Jawa Barat",
-    "ibukota": "Bandung",
-    "lat": "-6.902224715926122",
-    "lng": "107.6187597542088",
-    "elv": "739.0",
-    "tz": "7",
-    "luas": "37053.331",
-    "penduduk": "51316378.0",
-    "status": "1"
-  },
-  "message": "Successfully retrieved geo data for province Jawa Barat"
-}</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Cities/Regencies Endpoints -->
-          <div class="endpoint-section mb-5">
-            <h3 class="section-title">
-              <i class="fas fa-city me-2"></i>Regencies/Cities (Kabupaten/Kota)
-            </h3>
-            <div class="alert alert-success">
-              <i class="fas fa-check-circle me-2"></i>
-              <strong>Available:</strong> Geographic coordinates and boundary path data are
-              available for city/regency endpoints.
-            </div>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/kabupaten-kota</code>
-                <span class="endpoint-description">Get all regencies/cities</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <h6>Query Parameters</h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>kode_provinsi</code></td>
-                            <td>integer</td>
-                            <td>Filter by province code</td>
-                          </tr>
-                          <tr>
-                            <td><code>search</code></td>
-                            <td>string</td>
-                            <td>Search by name</td>
-                          </tr>
-                          <tr>
-                            <td><code>page</code></td>
-                            <td>integer</td>
-                            <td>Page number</td>
-                          </tr>
-                          <tr>
-                            <td><code>limit</code></td>
-                            <td>integer</td>
-                            <td>Items per page</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <h6>Example Response</h6>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": [
-    {
-      "kode_kabupaten_kota": "32.04",
-      "nama_kabupaten_kota": "Kabupaten Bandung"
-    }
-  ],
-  "message": "Successfully retrieved regencies/cities",
-  "total": 27,
-  "page": 1,
-  "limit": 10,
-  "totalPages": 3
-}</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Districts Endpoints -->
-          <div class="endpoint-section mb-5">
-            <h3 class="section-title"><i class="fas fa-building me-2"></i>Districts (Kecamatan)</h3>
-            <div class="alert alert-info">
-              <i class="fas fa-info-circle me-2"></i>
-              <strong>Note:</strong> Geographic coordinates and boundary data are not yet available
-              for district endpoints.
-            </div>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/kecamatan</code>
-                <span class="endpoint-description">Get all districts</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <h6>Query Parameters</h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>kode_kabupaten_kota</code></td>
-                            <td>string</td>
-                            <td>Filter by regency/city code</td>
-                          </tr>
-                          <tr>
-                            <td><code>search</code></td>
-                            <td>string</td>
-                            <td>Search by district name</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <h6>Example Usage</h6>
-                    <pre><code class="language-bash">GET /indonesian-maps/kecamatan?kode_kabupaten_kota=32.04</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Villages Endpoints -->
-          <div class="endpoint-section mb-5">
-            <h3 class="section-title"><i class="fas fa-home me-2"></i>Villages (Desa/Kelurahan)</h3>
-            <div class="alert alert-info">
-              <i class="fas fa-info-circle me-2"></i>
-              <strong>Note:</strong> Geographic coordinates and boundary data are not yet available
-              for village endpoints.
-            </div>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/desa-kelurahan</code>
-                <span class="endpoint-description">Get all villages</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <h6>Query Parameters</h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>kode_kecamatan</code></td>
-                            <td>string</td>
-                            <td>Filter by district code</td>
-                          </tr>
-                          <tr>
-                            <td><code>search</code></td>
-                            <td>string</td>
-                            <td>Search by village name</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <h6>Example Usage</h6>
-                    <pre><code class="language-bash">GET /indonesian-maps/desa-kelurahan?kode_kecamatan=32.04.01</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Islands Endpoints -->
-          <div class="endpoint-section mb-5">
-            <h3 class="section-title"><i class="fas fa-water me-2"></i>Islands (Pulau)</h3>
-
-            <div class="endpoint-item">
-              <div class="endpoint-header">
-                <span class="method-badge get">GET</span>
-                <code>/indonesian-maps/pulau</code>
-                <span class="endpoint-description">Get all islands</span>
-              </div>
-              <div class="endpoint-body">
-                <div class="row">
-                  <div class="col-md-6">
-                    <h6>Query Parameters</h6>
-                    <div class="table-responsive">
-                      <table class="table table-sm">
-                        <thead>
-                          <tr>
-                            <th>Parameter</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td><code>kode_provinsi</code></td>
-                            <td>integer</td>
-                            <td>Filter by province code</td>
-                          </tr>
-                          <tr>
-                            <td><code>search</code></td>
-                            <td>string</td>
-                            <td>Search by island name</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <h6>Example Response</h6>
-                    <pre><code class="language-json">{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "nama_pulau": "Pulau Batukapal",
-      "lat": "5.8833",
-      "lng": "95.3167"
-    }
-  ],
-  "total": 17222,
-  "page": 1,
-  "limit": 50
-}</code></pre>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Demo Section -->
-    <section id="demo" class="py-5">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center mb-5">
-            <h2 class="display-5 fw-bold mb-4">Live API Demo</h2>
-            <p class="lead">Test the API endpoints directly from your browser</p>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-12">
-            <div class="demo-card">
-              <div class="demo-controls">
-                <div class="row g-3">
-                  <div class="col-md-4">
-                    <label for="endpoint-select" class="form-label">Select Endpoint</label>
-                    <select class="form-select" id="endpoint-select">
-                      <option value="">API Info</option>
-                      <option value="/provinsi">All Provinces</option>
-                      <option value="/provinsi/32">Province Detail (West Java)</option>
-                      <option value="/provinsi/32/geo">Province Geo Data</option>
-                      <option value="/kabupaten-kota?kode_provinsi=32&limit=10">
-                        Cities in West Java
-                      </option>
-                      <option value="/pulau?limit=10">Islands (Limited)</option>
-                    </select>
-                  </div>
-                  <div class="col-md-6">
-                    <label for="endpoint-url" class="form-label">Full URL</label>
-                    <input type="text" class="form-control" id="endpoint-url" readonly />
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label">&nbsp;</label>
-                    <button class="btn btn-primary w-100" id="try-endpoint">
-                      <i class="fas fa-play me-2"></i>Try It
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="demo-response mt-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h5 class="mb-0">Response</h5>
-                  <div class="response-status" id="response-status"></div>
-                </div>
-                <pre
-                  id="response-output"
-                  class="response-content"
-                ><code class="language-json">Click "Try It" to see the response</code></pre>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive Map Section -->
-    <section id="map" class="py-5">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-lg-8 mx-auto text-center mb-5">
-            <h2 class="display-5 fw-bold mb-4">Interactive Map</h2>
-            <p class="lead">
-              Explore Indonesian provinces with detailed information and boundaries
-            </p>
-          </div>
-        </div>
-
-        <div class="row">
-          <div class="col-lg-3">
-            <div class="map-controls">
-              <h5>Map Controls</h5>
-
-              <div class="mb-3">
-                <label for="province-selector" class="form-label">Select Province</label>
-                <select class="form-select" id="province-selector">
-                  <option value="">Select a province...</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label for="city-selector" class="form-label">Select City/Regency</label>
-                <select class="form-select" id="city-selector" disabled>
-                  <option value="">Select a city/regency...</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label for="district-selector" class="form-label">Select District</label>
-                <select class="form-select" id="district-selector" disabled>
-                  <option value="">Select a district...</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label for="village-selector" class="form-label">Select Village</label>
-                <select class="form-select" id="village-selector" disabled>
-                  <option value="">Select a village...</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <div class="alert alert-info border-0">
-                  <i class="fas fa-info-circle me-2"></i>
-                  <strong>Boundaries:</strong> Province and city/regency boundaries are
-                  automatically displayed when locations are selected.
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <button class="btn btn-outline-primary w-100" id="reset-map">
-                  <i class="fas fa-undo me-2"></i>Reset View
-                </button>
-              </div>
-
-              <!-- Selected Location Info -->
-              <div class="location-info" id="province-info" style="display: none">
-                <h6>Selected Location</h6>
-                <div class="info-content" id="province-info-content">
-                  <!-- Dynamic content -->
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-lg-9">
-            <div class="map-container">
-              <div id="indonesia-map" class="interactive-map"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="bg-dark text-light py-5">
-      <div class="container">
-        <div class="row">
-          <div class="col-lg-4">
-            <h5>Indonesian Maps API</h5>
-            <p>Comprehensive RESTful API for Indonesian geographical and administrative data.</p>
-            <div class="social-links">
-              <a href="https://github.com/sukmaajidigital" target="_blank" class="text-light me-3">
-                <i class="fab fa-github fa-lg"></i>
-              </a>
-              <a
-                href="https://instagram.com/sukmaaji.digital"
-                target="_blank"
-                class="text-light me-3"
+            <div class="grid md:grid-cols-3 gap-8">
+              <div
+                class="bg-white p-8 rounded-xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300"
               >
-                <i class="fab fa-instagram fa-lg"></i>
-              </a>
-              <a href="https://sukmaaji.my.id" target="_blank" class="text-light">
-                <i class="fas fa-globe fa-lg"></i>
-              </a>
+                <div
+                  class="bg-blue-100 text-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                >
+                  <i class="fas fa-map-marked-alt text-3xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">Data Geografis Lengkap</h4>
+                <p class="text-gray-600">
+                  Akses informasi rinci untuk semua tingkatan administrasi di Indonesia, dari
+                  provinsi hingga desa.
+                </p>
+              </div>
+              <div
+                class="bg-white p-8 rounded-xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300"
+              >
+                <div
+                  class="bg-green-100 text-green-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                >
+                  <i class="fas fa-chart-line text-3xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">Informasi Demografis</h4>
+                <p class="text-gray-600">
+                  Dapatkan data populasi, ukuran luas wilayah, dan statistik demografis lainnya
+                  untuk setiap daerah.
+                </p>
+              </div>
+              <div
+                class="bg-white p-8 rounded-xl shadow-lg text-center transform hover:-translate-y-2 transition-transform duration-300"
+              >
+                <div
+                  class="bg-purple-100 text-purple-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6"
+                >
+                  <i class="fas fa-search text-3xl"></i>
+                </div>
+                <h4 class="text-xl font-bold text-gray-800 mb-2">Pencarian & Filter</h4>
+                <p class="text-gray-600">
+                  Fungsionalitas pencarian canggih dengan paginasi dan kemampuan penyaringan
+                  hierarkis.
+                </p>
+              </div>
             </div>
           </div>
-          <div class="col-lg-2">
-            <h6>Quick Links</h6>
-            <ul class="list-unstyled">
-              <li><a href="#home" class="text-light">Home</a></li>
-              <li><a href="#documentation" class="text-light">Documentation</a></li>
-              <li><a href="#demo" class="text-light">Demo</a></li>
-              <li><a href="#map" class="text-light">Map</a></li>
-            </ul>
+        </section>
+
+        <!-- Documentation Section -->
+        <section id="documentation" class="py-20 bg-white rounded-lg shadow-lg">
+          <div class="container mx-auto">
+            <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Dokumentasi API</h2>
+              <p class="text-lg text-gray-600 max-w-3xl mx-auto">
+                Referensi lengkap untuk semua endpoint yang tersedia. Klik pada setiap endpoint
+                untuk melihat detailnya.
+              </p>
+            </div>
+            <div class="space-y-4">
+              <!-- Endpoint: Provinsi -->
+              <details class="endpoint-card bg-slate-50 border rounded-lg overflow-hidden group">
+                <summary
+                  class="endpoint-summary flex justify-between items-center p-4 cursor-pointer hover:bg-slate-100"
+                >
+                  <div class="flex items-center gap-4">
+                    <i class="fas fa-map text-blue-500 text-xl w-6 text-center"></i>
+                    <span class="font-bold text-lg text-gray-700">Provinsi</span>
+                  </div>
+                  <svg
+                    class="w-5 h-5 text-gray-500 transform transition-transform duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </summary>
+                <div class="p-4 md:p-6 space-y-6">
+                  <!-- GET /provinsi -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/provinsi</code
+                      >
+                    </div>
+                    <div class="p-4 space-y-2">
+                      <p class="text-sm text-gray-600">
+                        Mengambil daftar semua provinsi di Indonesia.
+                      </p>
+                      <h6 class="font-semibold pt-2">Parameter Kueri</h6>
+                      <p class="text-sm text-gray-600">
+                        <code>page</code>, <code>limit</code>, <code>search</code>
+                      </p>
+                      <h6 class="font-semibold pt-2">Contoh Respons</h6>
+                      <pre><code class="language-json">{
+  "success": true,
+  "data": [ { "kode_provinsi": 11, "nama_provinsi": "Aceh" } /*, ...*/ ],
+  "total": 38
+}</code></pre>
+                    </div>
+                  </div>
+                  <!-- GET /provinsi/{code} -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/provinsi/{kode}</code
+                      >
+                    </div>
+                    <div class="p-4 space-y-2">
+                      <p class="text-sm text-gray-600">
+                        Mengambil detail spesifik satu provinsi berdasarkan kodenya.
+                      </p>
+                      <h6 class="font-semibold pt-2">Parameter Path</h6>
+                      <p class="text-sm text-gray-600"><code>kode</code> (integer, contoh: 32)</p>
+                    </div>
+                  </div>
+                  <!-- GET /provinsi/{code}/geo -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/provinsi/{kode}/geo</code
+                      >
+                    </div>
+                    <div class="p-4 space-y-2">
+                      <p class="text-sm text-gray-600">
+                        Mengambil data geografis dari provinsi, termasuk koordinat, luas, dan
+                        populasi.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Endpoint: Kabupaten/Kota -->
+              <details class="endpoint-card bg-slate-50 border rounded-lg overflow-hidden group">
+                <summary
+                  class="endpoint-summary flex justify-between items-center p-4 cursor-pointer hover:bg-slate-100"
+                >
+                  <div class="flex items-center gap-4">
+                    <i class="fas fa-city text-green-500 text-xl w-6 text-center"></i>
+                    <span class="font-bold text-lg text-gray-700">Kabupaten/Kota</span>
+                  </div>
+                  <svg
+                    class="w-5 h-5 text-gray-500 transform transition-transform duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </summary>
+                <div class="p-4 md:p-6 space-y-6">
+                  <!-- GET /kabupaten-kota -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/kabupaten-kota</code
+                      >
+                    </div>
+                    <div class="p-4 space-y-2">
+                      <p class="text-sm text-gray-600">
+                        Mengambil daftar semua kabupaten/kota. Dapat difilter berdasarkan provinsi.
+                      </p>
+                      <h6 class="font-semibold pt-2">Parameter Kueri</h6>
+                      <p class="text-sm text-gray-600">
+                        <code>kode_provinsi</code>, <code>search</code>, <code>page</code>,
+                        <code>limit</code>
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Other city endpoints -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/kabupaten-kota/{kode}</code
+                      >
+                    </div>
+                  </div>
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/kabupaten-kota/{kode}/geo</code
+                      >
+                    </div>
+                  </div>
+                </div>
+              </details>
+
+              <!-- Endpoint: Kecamatan & Desa -->
+              <details class="endpoint-card bg-slate-50 border rounded-lg overflow-hidden group">
+                <summary
+                  class="endpoint-summary flex justify-between items-center p-4 cursor-pointer hover:bg-slate-100"
+                >
+                  <div class="flex items-center gap-4">
+                    <i class="fas fa-building text-yellow-500 text-xl w-6 text-center"></i>
+                    <span class="font-bold text-lg text-gray-700">Kecamatan & Desa</span>
+                  </div>
+                  <svg
+                    class="w-5 h-5 text-gray-500 transform transition-transform duration-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </summary>
+                <div class="p-4 md:p-6 space-y-6">
+                  <div
+                    class="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg text-sm"
+                  >
+                    <p>
+                      <strong>Catatan:</strong> Data geografis (koordinat, path) belum tersedia
+                      untuk endpoint kecamatan dan desa.
+                    </p>
+                  </div>
+                  <!-- GET /kecamatan -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/kecamatan</code
+                      >
+                    </div>
+                    <div class="p-4 space-y-2">
+                      <p class="text-sm text-gray-600">
+                        Mengambil daftar kecamatan, dapat difilter berdasarkan kabupaten/kota.
+                      </p>
+                      <h6 class="font-semibold pt-2">Parameter Kueri</h6>
+                      <p class="text-sm text-gray-600">
+                        <code>kode_kabupaten_kota</code>, <code>search</code>, <code>page</code>,
+                        <code>limit</code>
+                      </p>
+                    </div>
+                  </div>
+                  <!-- GET /desa-kelurahan -->
+                  <div class="border rounded-lg overflow-hidden">
+                    <div class="flex items-center gap-4 p-3 bg-slate-200">
+                      <span
+                        class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full"
+                        >GET</span
+                      >
+                      <code class="text-sm text-gray-800 flex-1 bg-white p-2 rounded"
+                        >/desa-kelurahan</code
+                      >
+                    </div>
+                    <div class="p-4 space-y-2">
+                      <p class="text-sm text-gray-600">
+                        Mengambil daftar desa/kelurahan, dapat difilter berdasarkan kecamatan.
+                      </p>
+                      <h6 class="font-semibold pt-2">Parameter Kueri</h6>
+                      <p class="text-sm text-gray-600">
+                        <code>kode_kecamatan</code>, <code>search</code>, <code>page</code>,
+                        <code>limit</code>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </details>
+            </div>
           </div>
-          <div class="col-lg-3">
-            <h6>Endpoints</h6>
-            <ul class="list-unstyled">
-              <li><a href="#" class="text-light">Provinces</a></li>
-              <li><a href="#" class="text-light">Cities/Regencies</a></li>
-              <li><a href="#" class="text-light">Districts</a></li>
-              <li><a href="#" class="text-light">Villages</a></li>
-              <li><a href="#" class="text-light">Islands</a></li>
-            </ul>
+        </section>
+
+        <!-- Demo Section -->
+        <section id="demo" class="py-20">
+          <div class="container mx-auto">
+            <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Demo API Langsung</h2>
+              <p class="text-lg text-gray-600">Uji endpoint API langsung dari browser Anda</p>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+              <div class="grid md:grid-cols-12 gap-4 items-end">
+                <div class="md:col-span-4">
+                  <label
+                    for="endpoint-select-label"
+                    class="block text-sm font-medium text-gray-700 mb-1"
+                    >Pilih Endpoint</label
+                  >
+                  <div class="custom-select-wrapper" data-select-id="endpoint-select">
+                    <button class="custom-select-button">
+                      <span>Info API</span>
+                      <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="custom-select-options">
+                      <li data-value="">Info API</li>
+                      <li data-value="/provinsi">Semua Provinsi</li>
+                      <li data-value="/provinsi/32">Detail Provinsi (Jawa Barat)</li>
+                      <li data-value="/provinsi/32/geo">Data Geo Provinsi</li>
+                      <li data-value="/kabupaten-kota?kode_provinsi=32&limit=10">
+                        Kota di Jawa Barat
+                      </li>
+                      <li data-value="/pulau?limit=10">Pulau (Terbatas)</li>
+                    </ul>
+                  </div>
+                  <select id="endpoint-select" class="hidden">
+                    <option value="">Info API</option>
+                    <option value="/provinsi">Semua Provinsi</option>
+                    <option value="/provinsi/32">Detail Provinsi (Jawa Barat)</option>
+                    <option value="/provinsi/32/geo">Data Geo Provinsi</option>
+                    <option value="/kabupaten-kota?kode_provinsi=32&limit=10">
+                      Kota di Jawa Barat
+                    </option>
+                    <option value="/pulau?limit=10">Pulau (Terbatas)</option>
+                  </select>
+                </div>
+                <div class="md:col-span-6">
+                  <label for="endpoint-url" class="block text-sm font-medium text-gray-700 mb-1"
+                    >URL Lengkap</label
+                  >
+                  <input
+                    type="text"
+                    id="endpoint-url"
+                    class="mt-1 block w-full border-gray-300 rounded-md shadow-sm sm:text-sm bg-gray-100"
+                    readonly
+                  />
+                </div>
+                <div class="md:col-span-2">
+                  <button
+                    id="try-endpoint"
+                    class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300 flex items-center justify-center"
+                  >
+                    <i class="fas fa-play mr-2"></i>Coba
+                  </button>
+                </div>
+              </div>
+              <div class="mt-6">
+                <div class="flex justify-between items-center mb-2">
+                  <h5 class="font-semibold text-gray-800">Respons</h5>
+                  <div id="response-status"></div>
+                </div>
+                <div class="bg-gray-800 rounded-lg">
+                  <pre
+                    id="response-output"
+                    class="max-h-96 overflow-y-auto"
+                  ><code class="language-json">Klik "Coba" untuk melihat respons</code></pre>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="col-lg-3">
-            <h6>Contact</h6>
-            <p>
-              <i class="fas fa-envelope me-2"></i>
-              <a href="mailto:contact@sukmaaji.my.id" class="text-light">contact@sukmaaji.my.id</a>
-            </p>
-            <p>
-              <i class="fas fa-link me-2"></i>
-              <a href="https://sukmaaji.my.id" class="text-light">sukmaaji.my.id</a>
-            </p>
+        </section>
+
+        <!-- Interactive Map Section -->
+        <section id="map" class="py-20 bg-white rounded-lg shadow-lg">
+          <div class="container mx-auto">
+            <div class="text-center mb-12">
+              <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Peta Interaktif</h2>
+              <p class="text-lg text-gray-600">
+                Jelajahi wilayah Indonesia dengan informasi rinci dan batas wilayah
+              </p>
+            </div>
+            <div class="grid lg:grid-cols-12 gap-8">
+              <div class="lg:col-span-4 xl:col-span-3">
+                <div class="bg-slate-50 p-6 rounded-lg border h-full">
+                  <h5 class="text-xl font-bold mb-4">Kontrol Peta</h5>
+                  <div class="space-y-4">
+                    <select id="province-selector" class="hidden"></select>
+                    <select id="city-selector" class="hidden"></select>
+                    <select id="district-selector" class="hidden"></select>
+                    <select id="village-selector" class="hidden"></select>
+
+                    <!-- Custom Dropdowns -->
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700">Provinsi</label>
+                      <div class="custom-select-wrapper" data-select-id="province-selector">
+                        <button class="custom-select-button">
+                          <span>Pilih provinsi...</span><i class="fas fa-chevron-down"></i>
+                        </button>
+                        <ul class="custom-select-options"></ul>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700">Kota/Kabupaten</label>
+                      <div class="custom-select-wrapper" data-select-id="city-selector">
+                        <button class="custom-select-button" disabled>
+                          <span>Pilih kota/kab...</span><i class="fas fa-chevron-down"></i>
+                        </button>
+                        <ul class="custom-select-options"></ul>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700">Kecamatan</label>
+                      <div class="custom-select-wrapper" data-select-id="district-selector">
+                        <button class="custom-select-button" disabled>
+                          <span>Pilih kecamatan...</span><i class="fas fa-chevron-down"></i>
+                        </button>
+                        <ul class="custom-select-options"></ul>
+                      </div>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium text-gray-700">Desa/Kelurahan</label>
+                      <div class="custom-select-wrapper" data-select-id="village-selector">
+                        <button class="custom-select-button" disabled>
+                          <span>Pilih desa/kel...</span><i class="fas fa-chevron-down"></i>
+                        </button>
+                        <ul class="custom-select-options"></ul>
+                      </div>
+                    </div>
+
+                    <button
+                      id="reset-map"
+                      class="w-full bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-md hover:bg-gray-300 transition duration-300 flex items-center justify-center"
+                    >
+                      <i class="fas fa-undo mr-2"></i>Reset Peta
+                    </button>
+                    <div
+                      id="province-info"
+                      class="mt-4 bg-blue-50 p-4 rounded-lg"
+                      style="display: none"
+                    >
+                      <h6 class="font-bold text-blue-800 mb-2">Info Lokasi</h6>
+                      <div id="province-info-content" class="text-sm text-blue-900 space-y-1"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="lg:col-span-8 xl:col-span-9">
+                <div id="indonesia-map" class="w-full rounded-lg shadow-lg z-10"></div>
+              </div>
+            </div>
           </div>
-        </div>
-        <hr class="my-4" />
-        <div class="row">
-          <div class="col-lg-12 text-center">
-            <p>&copy; 2025 Sukma Aji Digital. All rights reserved.</p>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-12 mt-20 border-t border-gray-200">
+          <div class="container mx-auto">
+            <div class="grid md:grid-cols-4 gap-8">
+              <div>
+                <h5 class="font-bold text-lg mb-2 text-gray-800">Indonesian Maps API</h5>
+                <p class="text-sm text-gray-600">
+                  API RESTful untuk data geografis dan administratif Indonesia.
+                </p>
+                <div class="flex space-x-4 mt-4">
+                  <a
+                    href="https://github.com/sukmaajidigital"
+                    target="_blank"
+                    class="hover:text-blue-600 text-gray-500"
+                    ><i class="fab fa-github fa-lg"></i
+                  ></a>
+                  <a
+                    href="https://instagram.com/sukmaaji.digital"
+                    target="_blank"
+                    class="hover:text-pink-500 text-gray-500"
+                    ><i class="fab fa-instagram fa-lg"></i
+                  ></a>
+                  <a
+                    href="https://sukmaaji.my.id"
+                    target="_blank"
+                    class="hover:text-green-600 text-gray-500"
+                    ><i class="fas fa-globe fa-lg"></i
+                  ></a>
+                </div>
+              </div>
+              <div>
+                <h6 class="font-semibold text-gray-800 mb-2">Tautan Cepat</h6>
+                <ul class="text-sm space-y-2">
+                  <li><a href="#home" class="hover:text-blue-600 text-gray-600">Home</a></li>
+                  <li>
+                    <a href="#documentation" class="hover:text-blue-600 text-gray-600"
+                      >Dokumentasi</a
+                    >
+                  </li>
+                  <li><a href="#demo" class="hover:text-blue-600 text-gray-600">Demo</a></li>
+                  <li><a href="#map" class="hover:text-blue-600 text-gray-600">Peta</a></li>
+                </ul>
+              </div>
+              <div>
+                <h6 class="font-semibold text-gray-800 mb-2">Kontak</h6>
+                <p class="text-sm text-gray-600">
+                  <i class="fas fa-envelope mr-2"></i>
+                  <a href="mailto:sukmaaji.digital@gmail.com" class="hover:text-blue-600"
+                    >sukmaaji.digital@gmail.com</a
+                  >
+                </p>
+                <p class="text-sm text-gray-600">
+                  <i class="fas fa-link mr-2"></i>
+                  <a href="https://www.sukmaaji.my.id" target="_blank" class="hover:text-blue-600"
+                    >sukmaaji.my.id</a
+                  >
+                </p>
+              </div>
+            </div>
+            <hr class="my-8 border-gray-200" />
+            <div class="text-center text-sm text-gray-500">
+              <p>&copy; 2025 Sukma Aji Digital. Semua hak cipta dilindungi.</p>
+            </div>
           </div>
-        </div>
-      </div>
-    </footer>
+        </footer>
+      </main>
+    </div>
 
     <!-- External JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script
       src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin=""
     ></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
 
     <!-- Custom JS -->
-    <script src="script.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // --- Responsive Sidebar Logic ---
+        const mobileMenuButton = document.getElementById("mobile-menu-button");
+        const mobileMenuIcon = document.getElementById("mobile-menu-icon");
+        const sidebar = document.getElementById("sidebar");
+        const backdrop = document.getElementById("sidebar-backdrop");
+
+        function toggleSidebar() {
+          sidebar.classList.toggle("-translate-x-full");
+          backdrop.classList.toggle("hidden");
+          if (sidebar.classList.contains("-translate-x-full")) {
+            mobileMenuIcon.classList.remove("fa-times");
+            mobileMenuIcon.classList.add("fa-bars");
+          } else {
+            mobileMenuIcon.classList.remove("fa-bars");
+            mobileMenuIcon.classList.add("fa-times");
+          }
+        }
+
+        mobileMenuButton.addEventListener("click", toggleSidebar);
+        backdrop.addEventListener("click", toggleSidebar);
+
+        document.querySelectorAll("#sidebar a").forEach((link) => {
+          link.addEventListener("click", () => {
+            if (window.innerWidth < 768) {
+              toggleSidebar();
+            }
+          });
+        });
+
+        // --- Custom Dropdown Logic ---
+        function setupCustomSelect(wrapper) {
+          const button = wrapper.querySelector(".custom-select-button");
+          const optionsList = wrapper.querySelector(".custom-select-options");
+          const selectId = wrapper.dataset.selectId;
+          const nativeSelect = document.getElementById(selectId);
+
+          button.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeAllSelects();
+            optionsList.classList.toggle("hidden");
+          });
+
+          optionsList.addEventListener("click", (e) => {
+            if (e.target.tagName === "LI") {
+              button.querySelector("span").textContent = e.target.textContent;
+              nativeSelect.value = e.target.dataset.value;
+              nativeSelect.dispatchEvent(new Event("change"));
+              optionsList.classList.add("hidden");
+            }
+          });
+        }
+
+        function closeAllSelects() {
+          document
+            .querySelectorAll(".custom-select-options")
+            .forEach((list) => list.classList.add("hidden"));
+        }
+
+        document.querySelectorAll(".custom-select-wrapper").forEach(setupCustomSelect);
+        window.addEventListener("click", closeAllSelects);
+
+        // Add styles for custom dropdowns
+        const style = document.createElement("style");
+        style.innerHTML = `
+            .custom-select-wrapper { position: relative; }
+            .custom-select-button { 
+                display: flex; justify-content: space-between; align-items: center;
+                width: 100%; padding: 0.5rem 0.75rem; 
+                border: 1px solid #d1d5db; border-radius: 0.375rem; 
+                background-color: white; cursor: pointer;
+            }
+            .custom-select-button:disabled { background-color: #f3f4f6; cursor: not-allowed; }
+            .custom-select-button span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+            .custom-select-options {
+                position: absolute; top: 100%; left: 0; right: 0;
+                background-color: white; border: 1px solid #d1d5db;
+                border-radius: 0.375rem; margin-top: 0.25rem;
+                max-height: 15rem; overflow-y: auto;
+                z-index: 20; list-style: none; padding: 0;
+            }
+            .custom-select-options li {
+                padding: 0.5rem 0.75rem; cursor: pointer;
+            }
+             .custom-select-options li:hover { background-color: #f3f4f6; }
+        `;
+        document.head.appendChild(style);
+
+        // --- Indonesian Maps API Documentation - Main JavaScript File ---
+
+        const CONFIG = {
+          API_BASE_URL: "https://api.sukmaaji.my.id/indonesian-maps",
+          DEFAULT_COORDINATE: [-2.5, 118],
+          DEFAULT_ZOOM: 5,
+          INDONESIA_BOUNDS: [
+            [-11, 95],
+            [6, 141],
+          ],
+        };
+
+        let map;
+        let provincesData = [];
+        let currentLayers = { province: null, city: null, district: null, village: null };
+        let boundaryLayers = { province: null, city: null };
+        let selectedLocation = { province: null, city: null, district: null, village: null };
+
+        const utils = {
+          formatNumber: (num) => new Intl.NumberFormat("id-ID").format(num),
+          formatArea: (area) =>
+            isNaN(parseFloat(area)) ? "N/A" : `${utils.formatNumber(parseFloat(area))} km²`,
+          formatPopulation: (pop) =>
+            isNaN(parseFloat(pop)) ? "N/A" : utils.formatNumber(parseFloat(pop)),
+          showLoading: (element) => {
+            if (element)
+              element.innerHTML = `<div class="flex items-center justify-center p-4 text-sm text-gray-500"><svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Memuat...</span></div>`;
+          },
+          showError: (element, message) => {
+            if (element)
+              element.innerHTML = `<div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4" role="alert"><p>${message}</p></div>`;
+          },
+        };
+
+        const apiService = {
+          async fetchData(endpoint) {
+            try {
+              const response = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`);
+              if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+              return await response.json();
+            } catch (error) {
+              console.error("API fetch error:", error);
+              throw error;
+            }
+          },
+          getProvinces: () => apiService.fetchData("/provinsi"),
+          getProvinceGeo: (code) => apiService.fetchData(`/provinsi/${code}/geo`),
+          getCities: (provCode) =>
+            apiService.fetchData(`/kabupaten-kota?kode_provinsi=${provCode}&limit=200`),
+          getCityGeo: (code) => apiService.fetchData(`/kabupaten-kota/${code}/geo`),
+          getDistricts: (cityCode) =>
+            apiService.fetchData(`/kecamatan?kode_kabupaten_kota=${cityCode}&limit=200`),
+          getDistrictDetail: (code) => apiService.fetchData(`/kecamatan/${code}`),
+          getVillages: (distCode) =>
+            apiService.fetchData(`/desa-kelurahan?kode_kecamatan=${distCode}&limit=200`),
+          getVillageDetail: (code) => apiService.fetchData(`/desa-kelurahan/${code}`),
+        };
+
+        const mapManager = {
+          init() {
+            map = L.map("indonesia-map").setView(CONFIG.DEFAULT_COORDINATE, CONFIG.DEFAULT_ZOOM);
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+              attribution: "© OpenStreetMap",
+            }).addTo(map);
+            map.setMaxBounds(CONFIG.INDONESIA_BOUNDS);
+            this.loadProvincesListOnly();
+          },
+          async loadProvincesListOnly() {
+            try {
+              const res = await apiService.getProvinces();
+              if (res.success) {
+                provincesData = res.data;
+                this.updateCustomSelect(
+                  "province-selector",
+                  "Pilih provinsi...",
+                  provincesData,
+                  "nama_provinsi",
+                  "kode_provinsi"
+                );
+              }
+            } catch (e) {
+              console.error("Error loading provinces:", e);
+            }
+          },
+          updateCustomSelect(selectId, placeholder, data, textKey, valueKey) {
+            const wrapper = document.querySelector(
+              `.custom-select-wrapper[data-select-id="${selectId}"]`
+            );
+            const buttonSpan = wrapper.querySelector(".custom-select-button span");
+            const optionsList = wrapper.querySelector(".custom-select-options");
+            const nativeSelect = document.getElementById(selectId);
+
+            nativeSelect.innerHTML = `<option value="">${placeholder}</option>`;
+            optionsList.innerHTML = `<li data-value="">${placeholder}</li>`;
+
+            data.forEach((item) => {
+              const nativeOption = new Option(item[textKey], item[valueKey]);
+              nativeSelect.add(nativeOption);
+              const li = document.createElement("li");
+              li.textContent = item[textKey];
+              li.dataset.value = item[valueKey];
+              optionsList.appendChild(li);
+            });
+            buttonSpan.textContent = placeholder;
+            wrapper.querySelector("button").disabled = false;
+          },
+          clearCustomSelect(selectId, placeholder) {
+            const wrapper = document.querySelector(
+              `.custom-select-wrapper[data-select-id="${selectId}"]`
+            );
+            if (wrapper) {
+              wrapper.querySelector(".custom-select-button span").textContent = placeholder;
+              wrapper.querySelector(".custom-select-options").innerHTML = "";
+              wrapper.querySelector("button").disabled = true;
+            }
+          },
+          async selectProvince(code) {
+            this.resetMap(false);
+            this.clearCustomSelect("city-selector", "Pilih kota/kab...");
+            this.clearCustomSelect("district-selector", "Pilih kecamatan...");
+            this.clearCustomSelect("village-selector", "Pilih desa/kel...");
+            if (!code) return;
+
+            const infoContent = document.getElementById("province-info-content");
+            document.getElementById("province-info").style.display = "block";
+            utils.showLoading(infoContent);
+            selectedLocation = { province: code, city: null, district: null, village: null };
+
+            try {
+              const geo = await apiService.getProvinceGeo(code);
+              if (geo.success) {
+                this.addMarkerAndInfo(geo.data, "province");
+                this.showBoundary(geo.data.path, "province");
+                const cities = await apiService.getCities(code);
+                if (cities.success)
+                  this.updateCustomSelect(
+                    "city-selector",
+                    "Pilih kota/kab...",
+                    cities.data,
+                    "nama_kabupaten_kota",
+                    "kode_kabupaten_kota"
+                  );
+              } else {
+                utils.showError(infoContent, geo.error || "Gagal memuat data.");
+              }
+            } catch (e) {
+              utils.showError(infoContent, "Terjadi kesalahan jaringan.");
+            }
+          },
+          async selectCity(code) {
+            if (!code) {
+              if (currentLayers.city) map.removeLayer(currentLayers.city);
+              if (boundaryLayers.city) map.removeLayer(boundaryLayers.city);
+              this.clearCustomSelect("district-selector", "Pilih kecamatan...");
+              this.clearCustomSelect("village-selector", "Pilih desa/kel...");
+              selectedLocation.city = null;
+              selectedLocation.district = null;
+              selectedLocation.village = null;
+              if (selectedLocation.province) this.selectProvince(selectedLocation.province);
+              return;
+            }
+            selectedLocation.city = code;
+            selectedLocation.district = null;
+            selectedLocation.village = null;
+            try {
+              const geo = await apiService.getCityGeo(code);
+              if (geo.success) {
+                this.addMarkerAndInfo(geo.data, "city");
+                this.showBoundary(geo.data.path, "city");
+                const districts = await apiService.getDistricts(code);
+                if (districts.success)
+                  this.updateCustomSelect(
+                    "district-selector",
+                    "Pilih kecamatan...",
+                    districts.data,
+                    "nama_kecamatan",
+                    "kode_kecamatan"
+                  );
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          },
+          async selectDistrict(code) {
+            if (!code) {
+              if (currentLayers.district) map.removeLayer(currentLayers.district);
+              this.clearCustomSelect("village-selector", "Pilih desa/kel...");
+              selectedLocation.district = null;
+              selectedLocation.village = null;
+              if (selectedLocation.city) this.selectCity(selectedLocation.city);
+              return;
+            }
+            selectedLocation.district = code;
+            selectedLocation.village = null;
+            try {
+              const detail = await apiService.getDistrictDetail(code);
+              if (detail.success) {
+                this.addMarkerAndInfo(detail.data, "district");
+                const villages = await apiService.getVillages(code);
+                if (villages.success)
+                  this.updateCustomSelect(
+                    "village-selector",
+                    "Pilih desa/kel...",
+                    villages.data,
+                    "nama_desa_kelurahan",
+                    "kode_desa_kelurahan"
+                  );
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          },
+          async selectVillage(code) {
+            if (!code) {
+              if (currentLayers.village) map.removeLayer(currentLayers.village);
+              selectedLocation.village = null;
+              if (selectedLocation.district) this.selectDistrict(selectedLocation.district);
+              return;
+            }
+            selectedLocation.village = code;
+            try {
+              const detail = await apiService.getVillageDetail(code);
+              if (detail.success) this.addMarkerAndInfo(detail.data, "village");
+            } catch (e) {
+              console.error(e);
+            }
+          },
+          addMarkerAndInfo(data, type) {
+            if (currentLayers[type]) map.removeLayer(currentLayers[type]);
+
+            const icons = {
+              province: L.icon({
+                iconUrl:
+                  "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+                shadowUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+              }),
+              city: L.icon({
+                iconUrl:
+                  "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png",
+                shadowUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+              }),
+              district: L.icon({
+                iconUrl:
+                  "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+                shadowUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+              }),
+              village: L.icon({
+                iconUrl:
+                  "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png",
+                shadowUrl:
+                  "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41],
+              }),
+            };
+
+            let lat = data.lat,
+              lng = data.lng;
+            let title =
+              data.nama_provinsi ||
+              data.nama_kabupaten_kota ||
+              data.nama_kecamatan ||
+              data.nama_desa_kelurahan;
+            let popupData = {};
+
+            switch (type) {
+              case "province":
+                popupData = {
+                  Ibukota: data.ibukota,
+                  Populasi: utils.formatPopulation(data.penduduk),
+                  Luas: utils.formatArea(data.luas),
+                };
+                break;
+              case "city":
+                popupData = {
+                  Tipe: data.tipe,
+                  Populasi: utils.formatPopulation(data.penduduk),
+                  Luas: utils.formatArea(data.luas),
+                };
+                break;
+              case "district":
+                popupData = { "Kota/Kab": data.nama_kabupaten_kota, Provinsi: data.nama_provinsi };
+                break;
+              case "village":
+                popupData = {
+                  Kecamatan: data.nama_kecamatan,
+                  "Kota/Kab": data.nama_kabupaten_kota,
+                };
+                break;
+            }
+
+            // Approximate location for district/village
+            if (!lat && (type === "district" || type === "village")) {
+              const parentGeo =
+                type === "district" ? selectedLocation.cityGeo : selectedLocation.districtGeo;
+              if (parentGeo) {
+                lat = parseFloat(parentGeo.lat) + (Math.random() - 0.5) * 0.05;
+                lng = parseFloat(parentGeo.lng) + (Math.random() - 0.5) * 0.05;
+                popupData["Catatan"] = "Lokasi perkiraan";
+              }
+            }
+
+            if (lat && lng) {
+              const marker = L.marker([lat, lng], { icon: icons[type] }).addTo(map);
+              marker.bindPopup(this.createPopupContent(title, popupData)).openPopup();
+              map.setView(
+                [lat, lng],
+                type === "province" ? 8 : type === "city" ? 10 : type === "district" ? 12 : 14
+              );
+              currentLayers[type] = marker;
+            }
+            this.showLocationInfo(data, type);
+          },
+          createPopupContent(title, data) {
+            let content = `<h6 class="font-bold text-blue-600 mb-2">${title}</h6><div class="text-sm space-y-1">`;
+            for (const [key, value] of Object.entries(data))
+              content += `<div class="flex justify-between"><span class="font-semibold text-gray-500">${key}:</span> <span class="text-gray-800">${value}</span></div>`;
+            return content + "</div>";
+          },
+          showLocationInfo(data, type) {
+            const contentEl = document.getElementById("province-info-content");
+            let infoHtml = "";
+            const fields = {
+              province: {
+                Provinsi: "nama_provinsi",
+                Ibukota: "ibukota",
+                Populasi: (d) => utils.formatPopulation(d.penduduk),
+                Luas: (d) => utils.formatArea(d.luas),
+              },
+              city: {
+                "Kota/Kab": "nama_kabupaten_kota",
+                Tipe: "tipe",
+                Populasi: (d) => utils.formatPopulation(d.penduduk),
+                Luas: (d) => utils.formatArea(d.luas),
+              },
+              district: { Kecamatan: "nama_kecamatan", "Kota/Kab": "nama_kabupaten_kota" },
+              village: { "Desa/Kel": "nama_desa_kelurahan", Kecamatan: "nama_kecamatan" },
+            };
+            const currentFields = fields[type];
+            for (const [label, keyOrFn] of Object.entries(currentFields)) {
+              const value = typeof keyOrFn === "function" ? keyOrFn(data) : data[keyOrFn];
+              if (value)
+                infoHtml += `<div class="flex justify-between"><span class="font-semibold text-gray-600">${label}</span><span>${value}</span></div>`;
+            }
+            contentEl.innerHTML = infoHtml;
+          },
+          resetMap(fullReset = true) {
+            map.setView(CONFIG.DEFAULT_COORDINATE, CONFIG.DEFAULT_ZOOM);
+            Object.values(currentLayers).forEach((l) => l && map.removeLayer(l));
+            Object.values(boundaryLayers).forEach((l) => l && map.removeLayer(l));
+            currentLayers = { province: null, city: null, district: null, village: null };
+            boundaryLayers = { province: null, city: null };
+
+            if (fullReset) {
+              selectedLocation = { province: null, city: null, district: null, village: null };
+              this.clearCustomSelect(
+                "province-selector",
+                "Pilih provinsi...",
+                provincesData,
+                "nama_provinsi",
+                "kode_provinsi"
+              );
+              this.clearCustomSelect("city-selector", "Pilih kota/kab...");
+              this.clearCustomSelect("district-selector", "Pilih kecamatan...");
+              this.clearCustomSelect("village-selector", "Pilih desa/kel...");
+              document.getElementById("province-info").style.display = "none";
+            }
+          },
+          showBoundary(pathData, type) {
+            const layerKey = type === "province" ? "province" : "city";
+            const options = {
+              province: { color: "#e11d48", weight: 2, fillOpacity: 0.1 },
+              city: { color: "#2563eb", weight: 2, fillOpacity: 0.15 },
+            };
+            if (boundaryLayers[layerKey]) map.removeLayer(boundaryLayers[layerKey]);
+            if (!pathData) return;
+            try {
+              const pathCoords = typeof pathData === "string" ? JSON.parse(pathData) : pathData;
+              boundaryLayers[layerKey] = L.polygon(pathCoords, options[layerKey]).addTo(map);
+            } catch (e) {
+              console.error(`Error showing ${type} boundary:`, e);
+            }
+          },
+        };
+
+        const demoManager = {
+          init() {
+            const nativeSelect = document.getElementById("endpoint-select");
+            const urlInput = document.getElementById("endpoint-url");
+            nativeSelect.addEventListener(
+              "change",
+              () => (urlInput.value = CONFIG.API_BASE_URL + nativeSelect.value)
+            );
+            urlInput.value = CONFIG.API_BASE_URL + nativeSelect.value;
+            document.getElementById("try-endpoint").addEventListener("click", this.tryEndpoint);
+          },
+          async tryEndpoint() {
+            const endpoint = document.getElementById("endpoint-select").value;
+            const outputEl = document.getElementById("response-output");
+            const statusEl = document.getElementById("response-status");
+            outputEl.innerHTML = `<code class="language-json">Memuat...</code>`;
+            statusEl.innerHTML = `<span class="text-sm font-bold text-yellow-700 bg-yellow-200 px-3 py-1 rounded-full">LOADING</span>`;
+            try {
+              const data = await apiService.fetchData(endpoint);
+              outputEl.innerHTML = `<code class="language-json">${JSON.stringify(
+                data,
+                null,
+                2
+              )}</code>`;
+              statusEl.innerHTML = `<span class="text-sm font-bold text-green-700 bg-green-200 px-3 py-1 rounded-full">200 OK</span>`;
+              Prism.highlightElement(outputEl.querySelector("code"));
+            } catch (error) {
+              outputEl.innerHTML = `<code class="language-json">${JSON.stringify(
+                { error: error.message },
+                null,
+                2
+              )}</code>`;
+              statusEl.innerHTML = `<span class="text-sm font-bold text-red-700 bg-red-200 px-3 py-1 rounded-full">ERROR</span>`;
+            }
+          },
+        };
+
+        if (document.getElementById("indonesia-map")) mapManager.init();
+        demoManager.init();
+        document
+          .getElementById("province-selector")
+          .addEventListener("change", (e) => mapManager.selectProvince(e.target.value));
+        document
+          .getElementById("city-selector")
+          .addEventListener("change", (e) => mapManager.selectCity(e.target.value));
+        document
+          .getElementById("district-selector")
+          .addEventListener("change", (e) => mapManager.selectDistrict(e.target.value));
+        document
+          .getElementById("village-selector")
+          .addEventListener("change", (e) => mapManager.selectVillage(e.target.value));
+        document.getElementById("reset-map").addEventListener("click", () => mapManager.resetMap());
+        if (window.Prism) Prism.highlightAll();
+      });
+    </script>
   </body>
 </html>
+"
